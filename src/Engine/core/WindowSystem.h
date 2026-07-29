@@ -11,7 +11,7 @@ namespace LANE
     class WindowSystem
     {
     public:
-        void CreateWindow(uint32_t width, uint32_t height, const char* name);
+        GLFWwindow* CreateWindow(uint32_t width, uint32_t height, const char* name);
     private:
         std::vector<GLFWwindow*> m_windows;
     };

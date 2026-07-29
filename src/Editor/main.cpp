@@ -12,6 +12,7 @@ int main()
 
     auto app = builder->set_name("Editor")
         ->append_layers(layers)
+        ->set_graphics(LANE::GraphicsBit::Vulkan)
         ->add_window(800,600)
         ->build();
 

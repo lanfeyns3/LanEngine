@@ -27,12 +27,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(glfw vk-bootstrap volk)
 find_package(Vulkan REQUIRED)
 
-file(GLOB_RECURSE ENGINE_FILES src/Engine/**.cpp src/Engine/**.h)
-file(GLOB_RECURSE EDITOR_FILES src/Editor/**.cpp)
-
+# Fixed globbing patterns
+file(GLOB_RECURSE ENGINE_FILES CONFIGURE_DEPENDS src/Engine/*.cpp src/Engine/*.h src/Engine/**/*.cpp src/Engine/**/*.h)
+file(GLOB_RECURSE EDITOR_FILES CONFIGURE_DEPENDS src/Editor/*.cpp src/Editor/**/*.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${ENGINE_FILES})
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw volk vk-bootstrap::vk-bootstrap Vulkan::Vulkan)
+# Fixed target names (removed incorrect namespace from vk-bootstrap)
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw volk vk-bootstrap Vulkan::Vulkan)
 target_include_directories(${PROJECT_NAME} PUBLIC src/Engine/)
 
 add_executable(Editor ${EDITOR_FILES})

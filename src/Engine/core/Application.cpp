@@ -8,6 +8,8 @@ namespace LANE
         {
             glfwPollEvents();
             layers.UpdateLayers();
+
+            renderer.RenderScene();
         }
         
     }

@@ -2,6 +2,7 @@
 
 #include "LayerSystem.h"
 #include "WindowSystem.h"
+#include "renderer/Renderer.h"
 
 #include <string>
 #include <utility>
@@ -15,6 +16,7 @@ namespace LANE
     public:
         LayerSystem layers;
         WindowSystem windows;
+        Renderer renderer;
     public:
         bool running = true;
     public:
@@ -39,10 +41,17 @@ namespace LANE
             return this;
         }
 
+        ApplicationBuilder* set_graphics(GraphicsBit graphics)
+        {
+            app.renderer.SetGraphics(graphics);
+            return this;
+        }
+
         ApplicationBuilder* add_window(uint32_t width, uint32_t height, const char* name = nullptr)
         {
             const char* title = (name == nullptr) ? app.appName.c_str() : name;
-            app.windows.CreateWindow(width,height,title);
+
+            app.renderer.AddWindow(app.windows.CreateWindow(width,height,title));
             return this;
         }
 
