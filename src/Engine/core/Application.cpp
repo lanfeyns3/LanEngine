@@ -1,5 +1,7 @@
 #include "Application.h"
 
+bool running = true;
+
 namespace LANE
 {
     void Application::run()
@@ -7,6 +9,13 @@ namespace LANE
         while (running)
         {
             glfwPollEvents();
+
+            {
+                eventSystem.ReadBus();
+            }
+
+            eventSystem.PollEvents();
+
             layers.UpdateLayers();
 
             renderer.RenderScene();

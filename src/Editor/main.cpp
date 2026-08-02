@@ -4,19 +4,18 @@
 
 int main()
 {
-    LANE::ApplicationBuilder* builder = new LANE::ApplicationBuilder();
 
     std::vector<LANE::Layer*> layers;
     layers.reserve(1);
     layers.emplace_back(new EditorLayer());
 
-    auto app = builder->set_name("Editor")
-        ->append_layers(layers)
-        ->set_graphics(LANE::GraphicsBit::Vulkan)
-        ->add_window(800,600)
-        ->build();
+    LANE::Application app;
 
-    delete builder;
-
-    app.run();
+    app
+        .set_name("My Game")
+        .set_graphics(LANE::GraphicsBit::Vulkan)
+        .add_window(1280, 720)
+        .append_layers(layers)
+        .build()
+        .run();
 }

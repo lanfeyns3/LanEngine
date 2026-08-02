@@ -13,29 +13,6 @@ namespace LANE
     public:
         LayerSystem() = default;
 
-        // No copying
-        LayerSystem(const LayerSystem&) = delete;
-        LayerSystem& operator=(const LayerSystem&) = delete;
-
-        // Move constructor
-        LayerSystem(LayerSystem&& other) noexcept
-        {
-            std::lock_guard<std::mutex> lock(other.layerMutex);
-            m_layers = std::move(other.m_layers);
-        }
-
-        // Move assignment
-        LayerSystem& operator=(LayerSystem&& other) noexcept
-        {
-            if (this != &other)
-            {
-                // Lock both mutexes without deadlock
-                std::scoped_lock lock(layerMutex, other.layerMutex);
-                m_layers = std::move(other.m_layers);
-            }
-            return *this;
-        }
-
         void AppendLayer(Layer*& layer)
         {
             std::lock_guard<std::mutex> lock(layerMutex);

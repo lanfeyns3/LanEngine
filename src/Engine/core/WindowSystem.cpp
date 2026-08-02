@@ -7,7 +7,32 @@ namespace LANE
         glfwInit();
 
         glfwWindowHint(GLFW_CLIENT_API,GLFW_NO_API);
-        return m_windows.emplace_back(glfwCreateWindow(width,height,name,NULL,NULL));
+        GLFWwindow* window = m_windows.emplace_back(glfwCreateWindow(width,height,name,NULL,NULL));
+
+        glfwSetWindowUserPointer(window, this);
+        glfwSetKeyCallback(window, key_callback);
+
+        return window;
+    }
+
+    void WindowSystem::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+    {
+        auto* self = static_cast<WindowSystem*>(glfwGetWindowUserPointer(window));
+
+        if (self)
+            self->keyCallback(window,key,scancode,action,mods);
+    }
+
+    void WindowSystem::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+    {
+        if (key == GLFW_KEY_E && action == GLFW_PRESS)
+        {
+            LANE::EventData data;
+            data.eventType = EventType::Shutdown;
+
+            m_eventBus.Publish(data);
+        }
+            
     }
 
 } // namespace LANE
