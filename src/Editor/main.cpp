@@ -5,9 +5,12 @@
 int main()
 {
 
-    std::vector<LANE::Layer*> layers;
+    std::unordered_map<size_t,LANE::Layer*> layers;
     layers.reserve(1);
-    layers.emplace_back(new EditorLayer());
+    layers[typeid(EditorLayer).hash_code()] = new EditorLayer();
+
+    std::unordered_map<size_t,std::vector<LANE::EventType>> subscribers;
+    subscribers[typeid(EditorLayer).hash_code()] = {LANE::EventType::Key};
 
     LANE::Application app;
 
@@ -16,6 +19,7 @@ int main()
         .set_graphics(LANE::GraphicsBit::Vulkan)
         .add_window(1280, 720)
         .append_layers(layers)
+        .subscribe_layers(subscribers)
         .build()
         .run();
 }

@@ -12,6 +12,7 @@ namespace LANE
 
             {
                 eventSystem.ReadBus();
+                layers.ReadBus();
             }
 
             eventSystem.PollEvents();

@@ -7,7 +7,8 @@ namespace LANE
     enum class EventType : uint16_t
     {
         None,
-        Shutdown
+        Shutdown,
+        Key
     };
 
     struct Event
@@ -15,7 +16,20 @@ namespace LANE
         
     };
 
-    struct Shutdown : public Event
+    enum class KeyEventType
+    {
+        KeyStroke,
+        KeyHeld,
+        KeyReleased
+    };
+
+    struct KeyEvent : public Event
+    {
+        KeyEventType type;
+        uint32_t key;
+    };
+
+    struct ShutdownEvent : public Event
     {
 
     };

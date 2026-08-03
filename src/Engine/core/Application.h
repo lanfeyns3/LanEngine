@@ -15,7 +15,7 @@ namespace LANE
     {
     public:
         Application()
-            : eventSystem(eventBus), windows(eventBus)
+            : eventSystem(eventBus), windows(eventBus), layers(eventBus)
         {}
 
         Application& set_name(const char* name)
@@ -24,13 +24,26 @@ namespace LANE
             return *this;
         }
 
-        Application& append_layers(const std::vector<Layer*>& newLayers)
+        Application& append_layers(const std::unordered_map<size_t,Layer*>newLayers)
         {
-            for (auto* layer : newLayers)
+            for (auto layer : newLayers)
             {
-                layers.AppendLayer(layer);
+                layers.AppendLayer(layer.second,layer.first);
             }
 
+            return *this;
+        }
+        
+        Application& subscribe_layers(const std::unordered_map<size_t,std::vector<EventType>>& events)
+        {
+            for (auto entry : events)
+            {
+                for (auto event : entry.second)
+                {
+                    eventSystem.Subscribe(entry.first,event);
+                }
+                
+            }
             return *this;
         }
 

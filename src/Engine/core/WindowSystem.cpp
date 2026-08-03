@@ -25,14 +25,17 @@ namespace LANE
 
     void WindowSystem::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
     {
-        if (key == GLFW_KEY_E && action == GLFW_PRESS)
+        if (action == GLFW_PRESS)
         {
-            LANE::EventData data;
-            data.eventType = EventType::Shutdown;
-
+            EventData data;
+            KeyEvent* keyEvent = new KeyEvent;
+            keyEvent->key = key;
+            keyEvent->type = KeyEventType::KeyStroke;
+            
+            data.eventType = EventType::Key;
+            data.data = keyEvent;
             m_eventBus.Publish(data);
         }
-            
     }
 
 } // namespace LANE

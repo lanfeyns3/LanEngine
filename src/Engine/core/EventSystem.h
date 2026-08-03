@@ -5,6 +5,8 @@
 #include "Events.h"
 #include "EventBus.h"
 
+#include "Layer.h"
+
 namespace LANE
 {
     
@@ -17,11 +19,12 @@ namespace LANE
 
         }
 
-
         void ReadBus();
         void PollEvents();
+        void Subscribe(size_t layer, EventType event);
     private:
         std::unordered_map<EventType,std::vector<Event*>> m_events;
+        std::unordered_map<EventType,std::vector<size_t>> m_subscribers;
         EventBus& m_eventBus;
     };
 } // namespace LANE
