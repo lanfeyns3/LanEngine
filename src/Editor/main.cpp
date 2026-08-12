@@ -16,7 +16,6 @@ int main()
 
     app
         .set_name("My Game")
-        .set_graphics(LANE::GraphicsBit::Vulkan)
         .add_window(1280, 720)
         .append_layers(layers)
         .subscribe_layers(subscribers)

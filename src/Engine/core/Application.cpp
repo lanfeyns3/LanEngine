@@ -19,7 +19,7 @@ namespace LANE
 
             layers.UpdateLayers();
 
-            renderer.RenderScene();
+            renderer.RenderScene(windows.GetMainWindow());
         }
         
     }
