@@ -19,12 +19,18 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG v3.12.0
+)
+
+FetchContent_Declare(
     volk
     GIT_REPOSITORY https://github.com/zeux/volk.git
     GIT_TAG vulkan-sdk-1.4.328.0
 )
 
-FetchContent_MakeAvailable(glfw vk-bootstrap volk)
+FetchContent_MakeAvailable(glfw nlohmann_json vk-bootstrap volk)
 find_package(Vulkan REQUIRED)
 
 # Fixed globbing patterns
@@ -32,8 +38,7 @@ file(GLOB_RECURSE ENGINE_FILES CONFIGURE_DEPENDS src/Engine/*.cpp src/Engine/*.h
 file(GLOB_RECURSE EDITOR_FILES CONFIGURE_DEPENDS src/Editor/*.cpp src/Editor/**/*.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${ENGINE_FILES})
-# Fixed target names (removed incorrect namespace from vk-bootstrap)
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw volk vk-bootstrap Vulkan::Vulkan)
+target_link_libraries(${PROJECT_NAME} PUBLIC glfw nlohmann_json::nlohmann_json volk vk-bootstrap Vulkan::Vulkan)
 target_include_directories(${PROJECT_NAME} PUBLIC src/Engine/)
 
 add_executable(Editor ${EDITOR_FILES})

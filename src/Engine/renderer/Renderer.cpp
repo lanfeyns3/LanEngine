@@ -20,38 +20,10 @@ namespace LANE
         return buffer;
     }
 
-    VkShaderModule createShaderModule(
-        VkDevice device,
-        const char* path)
-    {
-        auto code = readFile(path);
+    
 
-        VkShaderModuleCreateInfo info{};
-        info.sType =
-            VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-
-        info.codeSize = code.size();
-
-        info.pCode =
-            reinterpret_cast<const uint32_t*>(code.data());
-
-
-        VkShaderModule module;
-
-        if (vkCreateShaderModule(
-            device,
-            &info,
-            nullptr,
-            &module) != VK_SUCCESS)
-        {
-            throw std::runtime_error(
-                "shader creation failed");
-        }
-
-        return module;
-    }
-
-    Renderer::Renderer()
+    Renderer::Renderer(AssetSystem& Assets)
+        : assets(Assets)
     {
         volkInitialize();
 
@@ -393,15 +365,10 @@ namespace LANE
         }
 
         {
-            VkShaderModule vert =
-                createShaderModule(
-                    vkbDevice.device,
-                    "shaders/vert.spv");
-                
-            VkShaderModule frag =
-                createShaderModule(
-                    vkbDevice.device,
-                    "shaders/frag.spv");
+            std::fstream f("./shaders/shader.shader");
+
+            nlohmann::json file = nlohmann::json::parse(f);
+            auto shaderAsset = assets.LoadAsset<ShaderAsset>(4,file,vkbDevice.device);
                 
                 
             VkPipelineShaderStageCreateInfo stages[2]{};
@@ -413,7 +380,7 @@ namespace LANE
             stages[0].stage =
             VK_SHADER_STAGE_VERTEX_BIT;
                 
-            stages[0].module = vert;
+            stages[0].module = shaderAsset->vertex;
             stages[0].pName = "main";
                 
                 
@@ -423,7 +390,7 @@ namespace LANE
             stages[1].stage =
             VK_SHADER_STAGE_FRAGMENT_BIT;
                 
-            stages[1].module = frag;
+            stages[1].module = shaderAsset->fragment;
             stages[1].pName = "main";
                 
                 

@@ -4,6 +4,8 @@
 #include <VkBootstrap.h>
 #include <GLFW/glfw3.h>
 
+#include "core/AssetSystem.h"
+
 namespace LANE
 {
     struct VKWindow
@@ -27,10 +29,12 @@ namespace LANE
     class Renderer
     {
     public:
-        Renderer();
+        Renderer(AssetSystem& Assets);
     public:
         void RenderScene(GLFWwindow* window);
         void AddWindow(GLFWwindow* window);
+    private:
+        AssetSystem& assets;
     private:
         vkb::Instance vkbInstance;
         vkb::PhysicalDevice vkbPDevice;

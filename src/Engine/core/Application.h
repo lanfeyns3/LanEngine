@@ -5,6 +5,7 @@
 #include "WindowSystem.h"
 #include "EventSystem.h"
 #include "renderer/Renderer.h"
+#include "AssetSystem.h"
 
 #include <string>
 #include <vector>
@@ -15,7 +16,7 @@ namespace LANE
     {
     public:
         Application()
-            : eventSystem(eventBus), windows(eventBus), layers(eventBus)
+            : eventSystem(eventBus), windows(eventBus), layers(eventBus), renderer(assets)
         {}
 
         Application& set_name(const char* name)
@@ -50,9 +51,7 @@ namespace LANE
         Application& add_window(uint32_t width, uint32_t height, const char* name = nullptr)
         {
             const char* title = name ? name : appName.c_str();
-
-            renderer = Renderer();
-
+            
             renderer.AddWindow(
                 windows.CreateWindow(width, height, title)
             );
@@ -73,6 +72,7 @@ namespace LANE
         WindowSystem windows;
         Renderer renderer;
         EventSystem eventSystem;
+        AssetSystem assets;
 
         std::string appName = "LANE";
     };
