@@ -3,6 +3,10 @@
 #include <volk.h>
 #include <nlohmann/json.hpp>
 
+#include <glslang/Public/ShaderLang.h>
+#include <glslang/Public/ResourceLimits.h>
+#include <SPIRV/GlslangToSpv.h>
+
 namespace LANE
 {
     struct Asset

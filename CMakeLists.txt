@@ -30,7 +30,15 @@ FetchContent_Declare(
     GIT_TAG vulkan-sdk-1.4.328.0
 )
 
-FetchContent_MakeAvailable(glfw nlohmann_json vk-bootstrap volk)
+FetchContent_Declare(
+    glslang
+    GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
+    GIT_TAG vulkan-sdk-1.4.328.0
+)
+
+set(ENABLE_OPT OFF CACHE BOOL "Enable optimization" FORCE)
+
+FetchContent_MakeAvailable(glfw nlohmann_json glslang vk-bootstrap volk)
 find_package(Vulkan REQUIRED)
 
 # Fixed globbing patterns
@@ -38,7 +46,16 @@ file(GLOB_RECURSE ENGINE_FILES CONFIGURE_DEPENDS src/Engine/*.cpp src/Engine/*.h
 file(GLOB_RECURSE EDITOR_FILES CONFIGURE_DEPENDS src/Editor/*.cpp src/Editor/**/*.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${ENGINE_FILES})
-target_link_libraries(${PROJECT_NAME} PUBLIC glfw nlohmann_json::nlohmann_json volk vk-bootstrap Vulkan::Vulkan)
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    glfw
+    nlohmann_json::nlohmann_json
+    glslang
+    glslang-default-resource-limits
+    SPIRV
+    volk
+    vk-bootstrap
+    Vulkan::Vulkan
+)
 target_include_directories(${PROJECT_NAME} PUBLIC src/Engine/)
 
 add_executable(Editor ${EDITOR_FILES})
