@@ -36,12 +36,17 @@ FetchContent_Declare(
     GIT_TAG vulkan-sdk-1.4.328.0
 )
 
+FetchContent_Declare(
+    EnTT
+    GIT_REPOSITORY https://github.com/skypjack/entt.git
+    GIT_TAG main
+)
+
 set(ENABLE_OPT OFF CACHE BOOL "Enable optimization" FORCE)
 
-FetchContent_MakeAvailable(glfw nlohmann_json glslang vk-bootstrap volk)
+FetchContent_MakeAvailable(glfw nlohmann_json glslang EnTT vk-bootstrap volk)
 find_package(Vulkan REQUIRED)
 
-# Fixed globbing patterns
 file(GLOB_RECURSE ENGINE_FILES CONFIGURE_DEPENDS src/Engine/*.cpp src/Engine/*.h src/Engine/**/*.cpp src/Engine/**/*.h)
 file(GLOB_RECURSE EDITOR_FILES CONFIGURE_DEPENDS src/Editor/*.cpp src/Editor/**/*.cpp)
 
@@ -49,6 +54,8 @@ add_library(${PROJECT_NAME} STATIC ${ENGINE_FILES})
 target_link_libraries(${PROJECT_NAME} PUBLIC
     glfw
     nlohmann_json::nlohmann_json
+    EnTT::EnTT
+
     glslang
     glslang-default-resource-limits
     SPIRV

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "EventBus.h"
 #include "LayerSystem.h"
 #include "WindowSystem.h"
 #include "EventSystem.h"
 #include "renderer/Renderer.h"
 #include "AssetSystem.h"
+#include "SceneManager.h"
 
 #include <string>
 #include <vector>
@@ -16,8 +16,10 @@ namespace LANE
     {
     public:
         Application()
-            : eventSystem(eventBus), windows(eventBus), layers(eventBus), renderer(assets)
-        {}
+            : renderer(assets), windows(eventSystem),eventSystem(layers)
+        {
+            scenes.AddScene(0);
+        }
 
         Application& set_name(const char* name)
         {
@@ -67,12 +69,12 @@ namespace LANE
         void run();
 
     public:
-        EventBus eventBus;
         LayerSystem layers;
         WindowSystem windows;
         Renderer renderer;
         EventSystem eventSystem;
         AssetSystem assets;
+        SceneManager scenes;
 
         std::string appName = "LANE";
     };

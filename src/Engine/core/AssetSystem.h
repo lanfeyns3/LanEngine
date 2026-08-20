@@ -13,7 +13,7 @@ namespace LANE
     {
     public:
         template<typename T,typename... _Args>
-        std::shared_ptr<T> LoadAsset(uint32_t id,nlohmann::json jsonFile, _Args&&... args)
+        std::shared_ptr<T> LoadAsset(uint64_t id,nlohmann::json jsonFile, _Args&&... args)
         {
             m_assets[id] = std::make_shared<T>(std::forward<_Args>(args)...);
             m_assets[id]->Load(jsonFile);
@@ -21,6 +21,6 @@ namespace LANE
         }
 
     private:
-        std::unordered_map<uint32_t,std::shared_ptr<Asset>> m_assets;
+        std::unordered_map<uint64_t,std::shared_ptr<Asset>> m_assets;
     };
 } // namespace LANE

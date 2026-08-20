@@ -10,11 +10,6 @@ namespace LANE
         {
             glfwPollEvents();
 
-            {
-                eventSystem.ReadBus();
-                layers.ReadBus();
-            }
-
             eventSystem.PollEvents();
 
             layers.UpdateLayers();

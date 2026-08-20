@@ -15,7 +15,7 @@ namespace LANE
         return window;
     }
 
-    void WindowSystem::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+    void WindowSystem::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) // Front
     {
         auto* self = static_cast<WindowSystem*>(glfwGetWindowUserPointer(window));
 
@@ -23,18 +23,14 @@ namespace LANE
             self->keyCallback(window,key,scancode,action,mods);
     }
 
-    void WindowSystem::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+    void WindowSystem::keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods) // Actual actions
     {
         if (action == GLFW_PRESS)
         {
-            EventData data;
-            KeyEvent* keyEvent = new KeyEvent;
-            keyEvent->key = key;
-            keyEvent->type = KeyEventType::KeyStroke;
-            
-            data.eventType = EventType::Key;
-            data.data = keyEvent;
-            m_eventBus.Publish(data);
+            KeyEvent* newEvent = new KeyEvent();
+            newEvent->key = key;
+            newEvent->type = KeyEventType::KeyStroke;
+            m_events.AddEvent(EventType::Key,(Event*)newEvent);
         }
     }
 

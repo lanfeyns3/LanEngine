@@ -2,29 +2,6 @@
 
 namespace LANE
 {
-    void EventSystem::ReadBus()
-    {
-        auto events = m_eventBus.ReadEventQueue();
-        for (auto& event : events)
-        {
-            switch (event.eventType)
-            {
-            case EventType::Key:
-            {
-                KeyEvent* newEvent = new KeyEvent();
-                KeyEvent* cast = (KeyEvent*)event.data;
-                newEvent->key = cast->key;
-                newEvent->type = cast->type;
-
-                m_events[event.eventType].emplace_back(newEvent);
-                break;
-            }
-            default:
-                break;
-            }
-        }
-    }
-
     void EventSystem::PollEvents()
     {
         for (auto& event : m_events) 
@@ -44,12 +21,7 @@ namespace LANE
                 {
                     for (size_t subscriber : subscribers)
                     {
-                        LayerData data{};
-                        data.data = lEvent;
-                        data.eventType = event.first;
-                        data.layer = subscriber;
-
-                        m_eventBus.Publish(data);
+                        m_layers.PingEvent(subscriber,event.first,lEvent);
                     }
                 }
                 
@@ -62,6 +34,11 @@ namespace LANE
     void EventSystem::Subscribe(size_t layer, EventType event)
     {
         m_subscribers[event].emplace_back(layer);
+    }
+
+    void EventSystem::AddEvent(EventType type, Event *event)
+    {
+        m_events[type].emplace_back(event);
     }
 
 } // namespace LANE

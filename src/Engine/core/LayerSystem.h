@@ -6,17 +6,11 @@
 #include <mutex>
 #include <utility>
 
-#include "EventBus.h"
-
 namespace LANE
 {
     class LayerSystem
     {
     public:
-        LayerSystem(EventBus& eventBus)
-            : m_eventBus(eventBus)
-        {}
-
         void AppendLayer(Layer*& layer,size_t id)
         {
             std::lock_guard<std::mutex> lock(layerMutex);
@@ -32,21 +26,14 @@ namespace LANE
             }
         }
 
-        void ReadBus()
+        void PingEvent(size_t layer,EventType typeE, Event* event)
         {
             std::lock_guard<std::mutex> lock(layerMutex);
-            std::vector<LayerData> queue = m_eventBus.ReadLayerQueue();
-
-            for (LayerData data : queue)
-            {
-                m_layers[data.layer]->OnEvent(data.eventType,data.data);
-            }
+            m_layers[layer]->OnEvent(typeE,event);
         }
 
     private:
         std::unordered_map<size_t,Layer*> m_layers;
-
-        EventBus& m_eventBus;
         mutable std::mutex layerMutex;
     };
 } // namespace LANE

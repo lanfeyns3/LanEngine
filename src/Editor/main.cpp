@@ -4,15 +4,16 @@
 
 int main()
 {
+    LANE::Application app;
 
     std::unordered_map<size_t,LANE::Layer*> layers;
     layers.reserve(1);
-    layers[typeid(EditorLayer).hash_code()] = new EditorLayer();
+    layers[typeid(EditorLayer).hash_code()] = new EditorLayer(app);
 
     std::unordered_map<size_t,std::vector<LANE::EventType>> subscribers;
     subscribers[typeid(EditorLayer).hash_code()] = {LANE::EventType::Key};
 
-    LANE::Application app;
+    
 
     app
         .set_name("My Game")
