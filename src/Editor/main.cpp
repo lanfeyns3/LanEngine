@@ -20,6 +20,8 @@ int main()
         .add_window(1280, 720)
         .append_layers(layers)
         .subscribe_layers(subscribers)
-        .build()
-        .run();
+        .build();
+        
+    app.renderer.CreateShader("./shaders/shader.shader");
+    app.run();
 }

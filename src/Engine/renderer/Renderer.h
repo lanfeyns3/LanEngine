@@ -3,6 +3,7 @@
 #include <volk.h>
 #include <VkBootstrap.h>
 #include <GLFW/glfw3.h>
+#include <unordered_map>
 
 #include "core/AssetSystem.h"
 
@@ -15,8 +16,6 @@ namespace LANE
         VkRenderPass renderPass;
         std::vector<VkFramebuffer> framebuffers;
 
-        VkPipeline pipeline;
-        VkPipelineLayout layout;
         std::vector<VkCommandBuffer> commandBuffers;
 
         VkCommandPool commandPool;
@@ -33,6 +32,7 @@ namespace LANE
     public:
         void RenderScene(GLFWwindow* window);
         void AddWindow(GLFWwindow* window);
+        void CreateShader(std::string path);
     private:
         AssetSystem& assets;
     private:
@@ -42,7 +42,11 @@ namespace LANE
 
         VkQueue graphicsQueue, presentQueue;
 
+        VkRenderPass renderPass = VK_NULL_HANDLE;
+
         std::vector<VKWindow> windows;
+        std::unordered_map<uint64_t, VkPipeline> pipelines;
+        std::unordered_map<uint64_t, VkPipelineLayout> pipelineLayouts;
     };
     
 } // namespace LANE

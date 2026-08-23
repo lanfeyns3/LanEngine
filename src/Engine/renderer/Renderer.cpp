@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include <fstream>
+#include <iostream>
 
 namespace LANE
 {
@@ -106,15 +107,15 @@ namespace LANE
             VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 
 
-        rp.renderPass = renderWindow.renderPass;
+        rp.renderPass = renderPass;
         rp.framebuffer =
             renderWindow.framebuffers[imageIndex];
 
 
         rp.renderArea.extent =
         {
-            800,
-            600
+            1280,
+            720
         };
 
 
@@ -133,7 +134,7 @@ namespace LANE
         vkCmdBindPipeline(
             cmd,
             VK_PIPELINE_BIND_POINT_GRAPHICS,
-            renderWindow.pipeline);
+            pipelines[15482739461592837462]);
 
 
 
@@ -262,7 +263,7 @@ namespace LANE
                         })
                     .set_desired_present_mode(
                         VK_PRESENT_MODE_MAILBOX_KHR)
-                    .set_desired_extent(800,600)
+                    .set_desired_extent(1280,720)
                     .build();
 
             vkWindow.vkbSwapchain = ret.value();
@@ -302,21 +303,24 @@ namespace LANE
             sub.pColorAttachments = &ref;
 
 
-            VkRenderPassCreateInfo rp{};
-            rp.sType =
-                VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+            if (renderPass == VK_NULL_HANDLE)
+            {
+                VkRenderPassCreateInfo rp{};
+                rp.sType =
+                    VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 
-            rp.attachmentCount = 1;
-            rp.pAttachments = &color;
+                rp.attachmentCount = 1;
+                rp.pAttachments = &color;
 
-            rp.subpassCount = 1;
-            rp.pSubpasses = &sub;
+                rp.subpassCount = 1;
+                rp.pSubpasses = &sub;
 
-            vkCreateRenderPass(
-                vkbDevice.device,
-                &rp,
-                nullptr,
-                &vkWindow.renderPass);
+                vkCreateRenderPass(
+                    vkbDevice.device,
+                    &rp,
+                    nullptr,
+                    &renderPass);
+            }
         }
 
         {
@@ -336,13 +340,13 @@ namespace LANE
                 fb.sType =
                     VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 
-                fb.renderPass = vkWindow.renderPass;
+                fb.renderPass = renderPass;
 
                 fb.attachmentCount = 1;
                 fb.pAttachments = attachments;
 
-                fb.width = 800;
-                fb.height = 600;
+                fb.width = 1280;
+                fb.height = 720;
                 fb.layers = 1;
 
 
@@ -362,150 +366,6 @@ namespace LANE
 
             printf("Created %zu framebuffers\n",
                    vkWindow.framebuffers.size());
-        }
-
-        {
-            std::fstream f("./shaders/shader.shader");
-
-            nlohmann::json file = nlohmann::json::parse(f);
-            auto shaderAsset = assets.LoadAsset<ShaderAsset>(4,file,vkbDevice.device);
-                
-                
-            VkPipelineShaderStageCreateInfo stages[2]{};
-                
-                
-            stages[0].sType =
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                
-            stages[0].stage =
-            VK_SHADER_STAGE_VERTEX_BIT;
-                
-            stages[0].module = shaderAsset->vertex;
-            stages[0].pName = "main";
-                
-                
-            stages[1].sType =
-            VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-                
-            stages[1].stage =
-            VK_SHADER_STAGE_FRAGMENT_BIT;
-                
-            stages[1].module = shaderAsset->fragment;
-            stages[1].pName = "main";
-                
-                
-                
-            VkPipelineVertexInputStateCreateInfo vertex{};
-            vertex.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-                
-                
-            VkPipelineInputAssemblyStateCreateInfo assembly{};
-            assembly.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-                
-            assembly.topology =
-            VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-                
-                
-                
-            VkViewport viewport{};
-            viewport.width = 800;
-            viewport.height = 600;
-            viewport.maxDepth = 1;
-                
-                
-            VkRect2D scissor{};
-            scissor.extent =
-            {800,600};
-                
-                
-            VkPipelineViewportStateCreateInfo viewportState{};
-            viewportState.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-                
-            viewportState.viewportCount=1;
-            viewportState.pViewports=&viewport;
-                
-            viewportState.scissorCount=1;
-            viewportState.pScissors=&scissor;
-                
-                
-                
-            VkPipelineRasterizationStateCreateInfo raster{};
-            raster.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-                
-            raster.polygonMode =
-            VK_POLYGON_MODE_FILL;
-                
-            raster.cullMode =
-            VK_CULL_MODE_BACK_BIT;
-                
-            raster.frontFace =
-            VK_FRONT_FACE_CLOCKWISE;
-                
-            raster.lineWidth=1;
-                
-                
-            VkPipelineMultisampleStateCreateInfo msaa{};
-            msaa.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-                
-            msaa.rasterizationSamples =
-            VK_SAMPLE_COUNT_1_BIT;
-                
-                
-            VkPipelineColorBlendAttachmentState blend{};
-            blend.colorWriteMask =
-            0xf;
-                
-                
-            VkPipelineColorBlendStateCreateInfo blendState{};
-            blendState.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-                
-            blendState.attachmentCount=1;
-            blendState.pAttachments=&blend;
-                
-                
-                
-            VkPipelineLayoutCreateInfo layoutInfo{};
-            layoutInfo.sType =
-            VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-                
-            vkCreatePipelineLayout(
-                vkbDevice.device,
-                &layoutInfo,
-                nullptr,
-                &vkWindow.layout);
-            
-            
-            
-            VkGraphicsPipelineCreateInfo pipe{};
-            pipe.sType =
-            VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-            
-            pipe.stageCount=2;
-            pipe.pStages=stages;
-            
-            pipe.pVertexInputState=&vertex;
-            pipe.pInputAssemblyState=&assembly;
-            pipe.pViewportState=&viewportState;
-            pipe.pRasterizationState=&raster;
-            pipe.pMultisampleState=&msaa;
-            pipe.pColorBlendState=&blendState;
-            
-            pipe.layout=vkWindow.layout;
-            pipe.renderPass=vkWindow.renderPass;
-            
-            vkCreateGraphicsPipelines(
-                vkbDevice.device,
-                VK_NULL_HANDLE,
-                1,
-                &pipe,
-                nullptr,
-                &vkWindow.pipeline);
         }
 
         {
@@ -583,6 +443,151 @@ namespace LANE
                 nullptr,
                 &vkWindow.inFlight);
         }
+    }
+
+    void Renderer::CreateShader(std::string path)
+    {
+        std::fstream f(path);
+
+        nlohmann::json file = nlohmann::json::parse(f);
+        auto shaderAsset = assets.LoadAsset<ShaderAsset>(4,file,vkbDevice.device);
+
+            
+        VkPipelineShaderStageCreateInfo stages[2]{};
+            
+            
+        stages[0].sType =
+        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            
+        stages[0].stage =
+        VK_SHADER_STAGE_VERTEX_BIT;
+            
+        stages[0].module = shaderAsset->vertex;
+        stages[0].pName = "main";
+            
+            
+        stages[1].sType =
+        VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            
+        stages[1].stage =
+        VK_SHADER_STAGE_FRAGMENT_BIT;
+            
+        stages[1].module = shaderAsset->fragment;
+        stages[1].pName = "main";
+            
+            
+            
+        VkPipelineVertexInputStateCreateInfo vertex{};
+        vertex.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+            
+            
+        VkPipelineInputAssemblyStateCreateInfo assembly{};
+        assembly.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+            
+        assembly.topology =
+        VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+            
+            
+            
+        VkViewport viewport{};
+        viewport.width = 1280;
+        viewport.height = 720;
+        viewport.maxDepth = 1;
+            
+            
+        VkRect2D scissor{};
+        scissor.extent =
+        {1280,720};
+            
+            
+        VkPipelineViewportStateCreateInfo viewportState{};
+        viewportState.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
+            
+        viewportState.viewportCount=1;
+        viewportState.pViewports=&viewport;
+            
+        viewportState.scissorCount=1;
+        viewportState.pScissors=&scissor;
+            
+            
+            
+        VkPipelineRasterizationStateCreateInfo raster{};
+        raster.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
+            
+        raster.polygonMode =
+        VK_POLYGON_MODE_FILL;
+            
+        raster.cullMode =
+        VK_CULL_MODE_BACK_BIT;
+            
+        raster.frontFace =
+        VK_FRONT_FACE_CLOCKWISE;
+            
+        raster.lineWidth=1;
+            
+            
+        VkPipelineMultisampleStateCreateInfo msaa{};
+        msaa.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
+            
+        msaa.rasterizationSamples =
+        VK_SAMPLE_COUNT_1_BIT;
+            
+            
+        VkPipelineColorBlendAttachmentState blend{};
+        blend.colorWriteMask =
+        0xf;
+            
+            
+        VkPipelineColorBlendStateCreateInfo blendState{};
+        blendState.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
+            
+        blendState.attachmentCount=1;
+        blendState.pAttachments=&blend;
+            
+            
+            
+        VkPipelineLayoutCreateInfo layoutInfo{};
+        layoutInfo.sType =
+        VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+            
+        vkCreatePipelineLayout(
+            vkbDevice.device,
+            &layoutInfo,
+            nullptr,
+            &pipelineLayouts[file["UUID"]]);
+        
+        
+        
+        VkGraphicsPipelineCreateInfo pipe{};
+        pipe.sType =
+        VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        
+        pipe.stageCount=2;
+        pipe.pStages=stages;
+        
+        pipe.pVertexInputState=&vertex;
+        pipe.pInputAssemblyState=&assembly;
+        pipe.pViewportState=&viewportState;
+        pipe.pRasterizationState=&raster;
+        pipe.pMultisampleState=&msaa;
+        pipe.pColorBlendState=&blendState;
+        
+        pipe.layout=pipelineLayouts[file["UUID"]];
+        pipe.renderPass=renderPass;
+        
+        vkCreateGraphicsPipelines(
+            vkbDevice.device,
+            VK_NULL_HANDLE,
+            1,
+            &pipe,
+            nullptr,
+            &pipelines[file["UUID"]]);
     }
 
 } // namespace LANE
