@@ -28,6 +28,7 @@ public:
                 {
                     std::cout << "Add new Entity\n";
                     application.scenes.AddEntity(application.scenes.GetCurrentScene(),45);
+                    application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),45);
                 }
                 else if (keyEvent->key == GLFW_KEY_C)
                 {

@@ -16,7 +16,7 @@ namespace LANE
     {
     public:
         Application()
-            : renderer(assets), windows(eventSystem),eventSystem(layers)
+            : renderer(assets,scenes), windows(eventSystem),eventSystem(layers)
         {
             scenes.AddScene(0);
         }

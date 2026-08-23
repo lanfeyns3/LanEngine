@@ -1,3 +1,5 @@
+#define VMA_IMPLEMENTATION
+
 #include "Renderer.h"
 #include <fstream>
 #include <iostream>
@@ -23,8 +25,8 @@ namespace LANE
 
     
 
-    Renderer::Renderer(AssetSystem& Assets)
-        : assets(Assets)
+    Renderer::Renderer(AssetSystem& Assets,SceneManager& Scenes)
+        : assets(Assets), scenes(Scenes)
     {
         volkInitialize();
 
@@ -45,171 +47,128 @@ namespace LANE
 
     void Renderer::RenderScene(GLFWwindow* window)
     {
-        VKWindow& renderWindow = windows[0];
-        vkWaitForFences(
-            vkbDevice.device,
-            1,
-            &renderWindow.inFlight,
-            VK_TRUE,
-            UINT64_MAX);
-
-
-        vkResetFences(
-            vkbDevice.device,
-            1,
-            &renderWindow.inFlight);
-
-
-
-        uint32_t imageIndex;
-
-
-        vkAcquireNextImageKHR(
-            vkbDevice.device,
-            renderWindow.vkbSwapchain.swapchain,
-            UINT64_MAX,
-            renderWindow.imageAvailable,
-            VK_NULL_HANDLE,
-            &imageIndex);
-
-
-
-        VkCommandBuffer cmd =
-            renderWindow.commandBuffers[imageIndex];
-
-
-        vkResetCommandBuffer(
-            cmd,
-            0);
-
-
-
-        VkCommandBufferBeginInfo begin{};
-        begin.sType =
-            VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-
-        vkBeginCommandBuffer(
-            cmd,
-            &begin);
-
-
-
-        VkClearValue clear{};
-        clear.color =
+        if (vertexBuffer == VK_NULL_HANDLE)
         {
-            {0.1f,0.1f,0.1f,1.0f}
-        };
+            float vertexData[] = {
+                 0.0f, -0.5f,
+                 0.5f,  0.5f,
+                -0.5f,  0.5f
+            };
+
+            VmaAllocation vertexBufferAllocation;
+
+            VkBufferCreateInfo bufferInfo{};
+            bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+            bufferInfo.size = sizeof(vertexData);
+            bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+            bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+            VmaAllocationCreateInfo allocInfo{};
+            allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
 
-        VkRenderPassBeginInfo rp{};
-        rp.sType =
-            VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            vmaCreateBuffer(
+                allocator,
+                &bufferInfo,
+                &allocInfo,
+                &vertexBuffer,
+                &vertexBufferAllocation,
+                nullptr
+            );
 
 
-        rp.renderPass = renderPass;
-        rp.framebuffer =
-            renderWindow.framebuffers[imageIndex];
+            void* data;
+            vmaMapMemory(allocator, vertexBufferAllocation, &data);
+            memcpy(data, vertexData, sizeof(vertexData));
+            vmaUnmapMemory(allocator, vertexBufferAllocation);
+        }
 
-
-        rp.renderArea.extent =
+        if (scenes.View<Components::Renderer>(scenes.GetCurrentScene()).size() != 0)
         {
-            1280,
-            720
-        };
+            VKWindow& renderWindow = windows[0];
+            vkWaitForFences(vkbDevice.device, 1, &renderWindow.inFlight, VK_TRUE, UINT64_MAX);
+            vkResetFences(vkbDevice.device, 1, &renderWindow.inFlight);
 
+            uint32_t imageIndex;
+            vkAcquireNextImageKHR(
+                vkbDevice.device,
+                renderWindow.vkbSwapchain.swapchain,
+                UINT64_MAX,
+                renderWindow.imageAvailable,
+                VK_NULL_HANDLE,
+                &imageIndex);
+            
+            VkCommandBuffer cmd = renderWindow.commandBuffers[imageIndex];
+            vkResetCommandBuffer(cmd, 0);
+            
+            VkCommandBufferBeginInfo begin{};
+            begin.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+            vkBeginCommandBuffer(cmd, &begin);
+            
+            VkClearValue clear{};
+            clear.color =
+            {
+                {0.1f,0.1f,0.1f,1.0f}
+            };
+            
+            VkRenderPassBeginInfo rp{};
+            rp.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+            rp.renderPass = renderPass;
+            rp.framebuffer = renderWindow.framebuffers[imageIndex];
+            rp.renderArea.extent = {1280, 720};
+            rp.clearValueCount = 1;
+            rp.pClearValues = &clear;
+            
+            vkCmdBeginRenderPass(cmd, &rp, VK_SUBPASS_CONTENTS_INLINE);
+            
+            vkCmdBindPipeline(
+                cmd,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                pipelines[15482739461592837462]);
+            
+            
+            VkDeviceSize offsets[] = {0};
+            vkCmdBindVertexBuffers(
+                cmd,
+                0,
+                1,
+                &vertexBuffer,
+                offsets
+            );
 
-        rp.clearValueCount = 1;
-        rp.pClearValues = &clear;
+            vkCmdDraw(
+                cmd,
+                3,
+                1,
+                0,
+                0);
 
-
-
-        vkCmdBeginRenderPass(
-            cmd,
-            &rp,
-            VK_SUBPASS_CONTENTS_INLINE);
-
-
-
-        vkCmdBindPipeline(
-            cmd,
-            VK_PIPELINE_BIND_POINT_GRAPHICS,
-            pipelines[15482739461592837462]);
-
-
-
-        vkCmdDraw(
-            cmd,
-            3,
-            1,
-            0,
-            0);
-
-
-
-        vkCmdEndRenderPass(cmd);
-
-
-        vkEndCommandBuffer(cmd);
-
-
-
-        VkPipelineStageFlags waitStage =
-            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
-
-        VkSubmitInfo submit{};
-        submit.sType =
-            VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-
-        submit.waitSemaphoreCount = 1;
-        submit.pWaitSemaphores =
-            &renderWindow.imageAvailable;
-
-        submit.pWaitDstStageMask =
-            &waitStage;
-
-
-        submit.commandBufferCount = 1;
-        submit.pCommandBuffers = &cmd;
-
-
-        submit.signalSemaphoreCount = 1;
-        submit.pSignalSemaphores =
-            &renderWindow.renderFinished;
-
-
-
-        vkQueueSubmit(
-            graphicsQueue,
-            1,
-            &submit,
-            renderWindow.inFlight);
-
-
-
-        VkPresentInfoKHR present{};
-        present.sType =
-            VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-
-        present.waitSemaphoreCount = 1;
-        present.pWaitSemaphores =
-            &renderWindow.renderFinished;
-
-
-        present.swapchainCount = 1;
-        present.pSwapchains =
-            &renderWindow.vkbSwapchain.swapchain;
-
-        present.pImageIndices =
-            &imageIndex;
-
-
-        vkQueuePresentKHR(
-            presentQueue,
-            &present);
+            vkCmdEndRenderPass(cmd);
+            vkEndCommandBuffer(cmd);
+            
+            VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+            VkSubmitInfo submit{};
+            submit.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+            submit.waitSemaphoreCount = 1;
+            submit.pWaitSemaphores = &renderWindow.imageAvailable;
+            submit.pWaitDstStageMask = &waitStage;
+            submit.commandBufferCount = 1;
+            submit.pCommandBuffers = &cmd;
+            submit.signalSemaphoreCount = 1;
+            submit.pSignalSemaphores = &renderWindow.renderFinished;
+            
+            vkQueueSubmit(graphicsQueue, 1, &submit, renderWindow.inFlight);
+            
+            VkPresentInfoKHR present{};
+            present.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+            present.waitSemaphoreCount = 1;
+            present.pWaitSemaphores = &renderWindow.renderFinished;
+            present.swapchainCount = 1;
+            present.pSwapchains = &renderWindow.vkbSwapchain.swapchain;
+            present.pImageIndices = &imageIndex;
+            
+            vkQueuePresentKHR(presentQueue, &present);
+        }
     }
 
     void Renderer::AddWindow(GLFWwindow *window)
@@ -443,6 +402,23 @@ namespace LANE
                 nullptr,
                 &vkWindow.inFlight);
         }
+
+        {
+            VmaVulkanFunctions vulkanFunctions{};
+
+            vulkanFunctions.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
+            vulkanFunctions.vkGetDeviceProcAddr = vkGetDeviceProcAddr;
+
+
+            VmaAllocatorCreateInfo allocatorInfo{};
+            allocatorInfo.physicalDevice = vkbPDevice.physical_device;
+            allocatorInfo.device = vkbDevice.device;
+            allocatorInfo.instance = vkbInstance.instance;
+
+            allocatorInfo.pVulkanFunctions = &vulkanFunctions;
+
+            vmaCreateAllocator(&allocatorInfo, &allocator);
+        }
     }
 
     void Renderer::CreateShader(std::string path)
@@ -474,7 +450,6 @@ namespace LANE
             
         stages[1].module = shaderAsset->fragment;
         stages[1].pName = "main";
-            
             
             
         VkPipelineVertexInputStateCreateInfo vertex{};
@@ -589,5 +564,7 @@ namespace LANE
             nullptr,
             &pipelines[file["UUID"]]);
     }
+
+    
 
 } // namespace LANE

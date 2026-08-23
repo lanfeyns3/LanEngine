@@ -31,6 +31,14 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+    vma
+    GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
+    GIT_TAG v3.4.0
+)
+
+
+
+FetchContent_Declare(
     glslang
     GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
     GIT_TAG vulkan-sdk-1.4.328.0
@@ -44,7 +52,7 @@ FetchContent_Declare(
 
 set(ENABLE_OPT OFF CACHE BOOL "Enable optimization" FORCE)
 
-FetchContent_MakeAvailable(glfw nlohmann_json glslang EnTT vk-bootstrap volk)
+FetchContent_MakeAvailable(glfw nlohmann_json glslang vma EnTT vk-bootstrap volk)
 find_package(Vulkan REQUIRED)
 
 file(GLOB_RECURSE ENGINE_FILES CONFIGURE_DEPENDS src/Engine/*.cpp src/Engine/*.h src/Engine/**/*.cpp src/Engine/**/*.h)
@@ -60,6 +68,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     glslang-default-resource-limits
     SPIRV
     volk
+    GPUOpen::VulkanMemoryAllocator
     vk-bootstrap
     Vulkan::Vulkan
 )
