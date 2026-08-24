@@ -50,9 +50,9 @@ namespace LANE
         if (vertexBuffer == VK_NULL_HANDLE)
         {
             float vertexData[] = {
-                 0.0f, -0.5f,
-                 0.5f,  0.5f,
-                -0.5f,  0.5f
+                -0.5f,  -0.5f,
+                 0.5f,  -0.5f,
+                 0.0f,   0.5f
             };
 
             VmaAllocation vertexBufferAllocation;
@@ -67,7 +67,7 @@ namespace LANE
             allocInfo.usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
 
-            vmaCreateBuffer(
+            VkResult result = vmaCreateBuffer(
                 allocator,
                 &bufferInfo,
                 &allocInfo,
@@ -450,11 +450,27 @@ namespace LANE
             
         stages[1].module = shaderAsset->fragment;
         stages[1].pName = "main";
-            
-            
+
         VkPipelineVertexInputStateCreateInfo vertex{};
         vertex.sType =
         VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+
+        VkVertexInputBindingDescription binding{};
+        binding.binding = 0;
+        binding.stride = sizeof(float) * 2;
+        binding.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+        VkVertexInputAttributeDescription attribute{};
+        attribute.location = 0;
+        attribute.binding = 0;
+        attribute.format = VK_FORMAT_R32G32_SFLOAT;
+        attribute.offset = 0;
+
+        vertex.vertexBindingDescriptionCount = 1;
+        vertex.pVertexBindingDescriptions = &binding;
+
+        vertex.vertexAttributeDescriptionCount = 1;
+        vertex.pVertexAttributeDescriptions = &attribute;
             
             
         VkPipelineInputAssemblyStateCreateInfo assembly{};
@@ -564,7 +580,4 @@ namespace LANE
             nullptr,
             &pipelines[file["UUID"]]);
     }
-
-    
-
 } // namespace LANE
