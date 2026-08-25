@@ -16,6 +16,11 @@ public:
         
     }
 
+    void ImGuiUpdate()
+    {
+        
+    }
+
     void OnEvent(LANE::EventType eType, LANE::Event* event)
     {
         if (eType == LANE::EventType::Key)

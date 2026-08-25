@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 include(FetchContent)
 
 set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(LanEngine)
 
@@ -13,10 +14,12 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
-    vk-bootstrap
-    GIT_REPOSITORY https://github.com/charles-lunarg/vk-bootstrap.git
-    GIT_TAG v1.4.328
+    glad
+    GIT_REPOSITORY https://github.com/lanfeyns3/glad.git
+    GIT_TAG c
 )
+
+
 
 FetchContent_Declare(
     nlohmann_json
@@ -25,54 +28,54 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
-    volk
-    GIT_REPOSITORY https://github.com/zeux/volk.git
-    GIT_TAG vulkan-sdk-1.4.328.0
-)
-
-FetchContent_Declare(
-    vma
-    GIT_REPOSITORY https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-    GIT_TAG v3.4.0
-)
-
-
-
-FetchContent_Declare(
-    glslang
-    GIT_REPOSITORY https://github.com/KhronosGroup/glslang.git
-    GIT_TAG vulkan-sdk-1.4.328.0
-)
-
-FetchContent_Declare(
     EnTT
     GIT_REPOSITORY https://github.com/skypjack/entt.git
     GIT_TAG main
 )
 
-set(ENABLE_OPT OFF CACHE BOOL "Enable optimization" FORCE)
+FetchContent_MakeAvailable(
+    glfw
+    glad
+    nlohmann_json
+    EnTT
+)
 
-FetchContent_MakeAvailable(glfw nlohmann_json glslang vma EnTT vk-bootstrap volk)
-find_package(Vulkan REQUIRED)
+find_package(OpenGL REQUIRED)
 
-file(GLOB_RECURSE ENGINE_FILES CONFIGURE_DEPENDS src/Engine/*.cpp src/Engine/*.h src/Engine/**/*.cpp src/Engine/**/*.h)
-file(GLOB_RECURSE EDITOR_FILES CONFIGURE_DEPENDS src/Editor/*.cpp src/Editor/**/*.cpp)
+file(GLOB_RECURSE ENGINE_FILES
+    CONFIGURE_DEPENDS
+    src/Engine/*.cpp
+    src/Engine/*.h
+    src/Engine/**/*.cpp
+    src/Engine/**/*.h
+)
 
-add_library(${PROJECT_NAME} STATIC ${ENGINE_FILES})
+file(GLOB_RECURSE EDITOR_FILES
+    CONFIGURE_DEPENDS
+    src/Editor/*.cpp
+    src/Editor/**/*.cpp
+)
+
+add_library(${PROJECT_NAME} STATIC
+    ${ENGINE_FILES}
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC
+    src/Engine/
+)
+
 target_link_libraries(${PROJECT_NAME} PUBLIC
     glfw
+    glad
+    OpenGL::GL
     nlohmann_json::nlohmann_json
     EnTT::EnTT
-
-    glslang
-    glslang-default-resource-limits
-    SPIRV
-    volk
-    GPUOpen::VulkanMemoryAllocator
-    vk-bootstrap
-    Vulkan::Vulkan
 )
-target_include_directories(${PROJECT_NAME} PUBLIC src/Engine/)
 
-add_executable(Editor ${EDITOR_FILES})
-target_link_libraries(Editor ${PROJECT_NAME})
+add_executable(Editor
+    ${EDITOR_FILES}
+)
+
+target_link_libraries(Editor
+    ${PROJECT_NAME}
+)

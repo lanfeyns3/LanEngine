@@ -1,9 +1,13 @@
 #pragma once
 
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+
+#undef CreateWindow
 
 #include <vector>
 #include <stdint.h>
+#include <utility>
 
 #include "EventSystem.h"
 
@@ -18,12 +22,15 @@ namespace LANE
         {}
 
         GLFWwindow* CreateWindow(uint32_t width, uint32_t height, const char* name);
-        GLFWwindow* GetMainWindow() {return m_windows[0];}
+        GLFWwindow* GetMainWindow() {return m_windows[mainWindow];}
+
+
     private:
         static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
         void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     private:
         std::vector<GLFWwindow*> m_windows;
+        uint8_t mainWindow = 0;
         EventSystem& m_events;
     };
 } // namespace LANE

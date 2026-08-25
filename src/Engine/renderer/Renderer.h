@@ -1,59 +1,39 @@
 #pragma once
 
-#include <volk.h>
-#include <VkBootstrap.h>
-#include <vk_mem_alloc.h>
-
-#include <GLFW/glfw3.h>
+#include <string>
 #include <unordered_map>
+
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
+#undef CreateWindow
 
 #include "core/AssetSystem.h"
 #include "core/SceneManager.h"
+#include "core/LayerSystem.h"
+#include "core/WindowSystem.h"
 
 namespace LANE
 {
-    struct VKWindow
-    {
-        VkSurfaceKHR surface;
-        vkb::Swapchain vkbSwapchain;
-        VkRenderPass renderPass;
-        std::vector<VkFramebuffer> framebuffers;
-
-        std::vector<VkCommandBuffer> commandBuffers;
-
-        VkCommandPool commandPool;
-
-        VkSemaphore imageAvailable;
-        VkSemaphore renderFinished;
-        VkFence inFlight;
-    };
-
     class Renderer
     {
     public:
-        Renderer(AssetSystem& Assets,SceneManager& Scenes);
+        Renderer(
+            AssetSystem& Assets,
+            SceneManager& Scenes,
+            LayerSystem& Layers,
+            WindowSystem& Windows
+        );
+
     public:
         void RenderScene(GLFWwindow* window);
-        void AddWindow(GLFWwindow* window);
         void CreateShader(std::string path);
+
     private:
         AssetSystem& assets;
         SceneManager& scenes;
-    private:
-        vkb::Instance vkbInstance;
-        vkb::PhysicalDevice vkbPDevice;
-        vkb::Device vkbDevice;
-
-        VkQueue graphicsQueue, presentQueue;
-        VkBuffer vertexBuffer = VK_NULL_HANDLE;
-
-        VkRenderPass renderPass = VK_NULL_HANDLE;
-
-        VmaAllocator allocator;
-
-        std::vector<VKWindow> windows;
-        std::unordered_map<uint64_t, VkPipeline> pipelines;
-        std::unordered_map<uint64_t, VkPipelineLayout> pipelineLayouts;
+        LayerSystem& layers;
+        WindowSystem& windows;
     };
-    
+
 } // namespace LANE

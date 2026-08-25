@@ -1,11 +1,6 @@
 #pragma once
 
-#include <volk.h>
 #include <nlohmann/json.hpp>
-
-#include <glslang/Public/ShaderLang.h>
-#include <glslang/Public/ResourceLimits.h>
-#include <SPIRV/GlslangToSpv.h>
 
 namespace LANE
 {
@@ -16,14 +11,7 @@ namespace LANE
 
     struct ShaderAsset : public Asset
     {
-        ShaderAsset(VkDevice& Device)
-            : device(Device)
-        {};
-
+        ShaderAsset() {}
         void Load(nlohmann::json f);
-
-        VkShaderModule vertex;
-        VkShaderModule fragment;
-        VkDevice& device;
     };
 } // namespace LANE

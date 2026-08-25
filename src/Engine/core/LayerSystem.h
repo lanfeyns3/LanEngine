@@ -26,6 +26,15 @@ namespace LANE
             }
         }
 
+        void UpdateImgui()
+        {
+            std::lock_guard<std::mutex> lock(layerMutex);
+            for (auto layer : m_layers)
+            {
+                layer.second->ImGuiUpdate();
+            }
+        }
+
         void PingEvent(size_t layer,EventType typeE, Event* event)
         {
             std::lock_guard<std::mutex> lock(layerMutex);
