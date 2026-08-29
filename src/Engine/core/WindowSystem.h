@@ -1,3 +1,4 @@
+// WindowSystem.h
 #pragma once
 
 #include <glad/glad.h>
@@ -13,7 +14,6 @@
 
 namespace LANE
 {
-
     class WindowSystem
     {
     public:
@@ -22,15 +22,20 @@ namespace LANE
         {}
 
         GLFWwindow* CreateWindow(uint32_t width, uint32_t height, const char* name);
-        GLFWwindow* GetMainWindow() {return m_windows[mainWindow];}
+        GLFWwindow* GetMainWindow() { return m_windows[mainWindow]; }
+        void SetMainWindow(uint8_t windowID = 0) { mainWindow = windowID; }
 
+        GLFWwindow* GetWindow(uint8_t windowID);
+        std::pair<GLFWwindow*, uint8_t> GetWindow(const char* windowName);
 
     private:
         static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
         void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
     private:
         std::vector<GLFWwindow*> m_windows;
+        GLFWwindow* m_sharedContext = nullptr;
+        
         uint8_t mainWindow = 0;
         EventSystem& m_events;
     };
-} // namespace LANE
+}

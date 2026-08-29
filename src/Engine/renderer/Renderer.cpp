@@ -2,6 +2,8 @@
 #include <fstream>
 #include <iostream>
 
+using json = nlohmann::json;
+
 namespace LANE
 {
     std::vector<char> readFile(const char* filename)
@@ -28,20 +30,74 @@ namespace LANE
         : assets(Assets),
           scenes(Scenes),
           layers(Layers),
-          windows(Windows)
+          windows(Windows),
+          vao(0),
+          vbo(0)
     {
-        glfwWindowHint(GLFW_VISIBLE,GLFW_FALSE);
-        windows.CreateWindow(1280,720,"ManorEngineRendererLoader");
+        windows.CreateWindow(1280, 720, "ManorEngineRendererLoader");
+        glfwMakeContextCurrent(NULL);
     }
 
     void Renderer::RenderScene(GLFWwindow* window)
     {
+        glfwMakeContextCurrent(window);
+
+        if (vao == 0 || vbo == 0)
+        {
+            float vertices[] = {
+                 0.0f,  0.5f,
+                -0.5f, -0.5f,
+                 0.5f, -0.5f
+            };
+
+            glGenVertexArrays(1, &vao);
+            glGenBuffers(1, &vbo);
+
+            glBindVertexArray(vao);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(
+                GL_ARRAY_BUFFER,
+                sizeof(vertices),
+                vertices,
+                GL_STATIC_DRAW
+            );
+
+            glVertexAttribPointer(
+                0,
+                2,
+                GL_FLOAT,
+                GL_FALSE,
+                2 * sizeof(float),
+                nullptr
+            );
+
+            glEnableVertexAttribArray(0);
+
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+        }
+
+        auto asset = assets.GetAsset<ShaderAsset>(69);
+
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        if (asset)
+            glUseProgram(asset->shaderProgram);
+
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+
         glfwSwapBuffers(window);
     }
 
     void Renderer::CreateShader(std::string path)
     {
+        std::ifstream f(path);
+        json file = json::parse(f);
 
+        assets.LoadAsset<ShaderAsset>(69, file, windows.GetWindow("ManorEngineRendererLoader").first);
     }
-
 } // namespace LANE

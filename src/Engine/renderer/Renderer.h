@@ -34,6 +34,10 @@ namespace LANE
         SceneManager& scenes;
         LayerSystem& layers;
         WindowSystem& windows;
+
+        GLuint vao = 0;
+        GLuint vbo = 0;
+
     };
 
 } // namespace LANE

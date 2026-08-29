@@ -55,6 +55,8 @@ namespace LANE
             const char* title = name ? name : appName.c_str();
 
             windows.CreateWindow(width, height, title);
+            auto pair = windows.GetWindow(title);
+            windows.SetMainWindow(pair.second);
 
             return *this;
         }
