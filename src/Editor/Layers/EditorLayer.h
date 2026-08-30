@@ -18,7 +18,9 @@ public:
 
     void ImGuiUpdate()
     {
-        
+        ImGui::Begin("Inspector");
+        ImGui::Text("Hello, World!");
+        ImGui::End();
     }
 
     void OnEvent(LANE::EventType eType, LANE::Event* event)
@@ -34,6 +36,7 @@ public:
                     std::cout << "Add new Entity\n";
                     application.scenes.AddEntity(application.scenes.GetCurrentScene(),45);
                     application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),45);
+                    application.scenes.AddComponent<LANE::Components::Transform>(application.scenes.GetCurrentScene(),45);
                 }
                 else if (keyEvent->key == GLFW_KEY_C)
                 {

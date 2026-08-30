@@ -57,6 +57,7 @@ namespace LANE
             windows.CreateWindow(width, height, title);
             auto pair = windows.GetWindow(title);
             windows.SetMainWindow(pair.second);
+            renderer.RegisterWindowImgui(pair.first);
 
             return *this;
         }

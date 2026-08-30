@@ -8,6 +8,10 @@
 
 #undef CreateWindow
 
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_glfw.h>
+
 #include "core/AssetSystem.h"
 #include "core/SceneManager.h"
 #include "core/LayerSystem.h"
@@ -28,15 +32,18 @@ namespace LANE
     public:
         void RenderScene(GLFWwindow* window);
         void CreateShader(std::string path);
+        void RegisterWindowImgui(GLFWwindow * window);
 
     private:
         AssetSystem& assets;
         SceneManager& scenes;
         LayerSystem& layers;
         WindowSystem& windows;
+    private:
+        std::unordered_map<GLFWwindow *,ImGuiContext*> m_contexts;
 
-        GLuint vao = 0;
-        GLuint vbo = 0;
+        GLuint vao = 0; // TODO: seperate
+        GLuint vbo = 0; // TODO: seperate
 
     };
 

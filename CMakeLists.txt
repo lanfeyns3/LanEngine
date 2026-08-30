@@ -33,11 +33,28 @@ FetchContent_Declare(
     GIT_TAG main
 )
 
+FetchContent_Declare(
+    glm
+    GIT_REPOSITORY https://github.com/g-truc/glm.git
+    GIT_TAG 1.0.3
+)
+
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/lanfeyns3/imgui.git
+    GIT_TAG docking
+)
+
+set(GLM_BUILD_TESTS OFF)
+set(IMGUI_ENABLE_OPENGL3 ON CACHE BOOL "Enable OpenGL3" FORCE)
+
 FetchContent_MakeAvailable(
     glfw
     glad
     nlohmann_json
     EnTT
+    glm
+    imgui
 )
 
 find_package(OpenGL REQUIRED)
@@ -70,6 +87,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     OpenGL::GL
     nlohmann_json::nlohmann_json
     EnTT::EnTT
+    glm
+    imgui
 )
 
 add_executable(Editor

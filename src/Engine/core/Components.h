@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include <string>
 
+#include <glm/glm.hpp>
+
 namespace LANE
 {
     namespace Components
@@ -16,6 +18,13 @@ namespace LANE
         struct Renderer // TODO: better name
         {
 
+        };
+
+        struct Transform
+        {
+            glm::vec3 position;
+            glm::vec3 rotation;
+            glm::vec3 scale;
         };
     } // namespace Components
     

@@ -34,9 +34,15 @@ namespace LANE
           vao(0),
           vbo(0)
     {
-        windows.CreateWindow(1280, 720, "ManorEngineRendererLoader");
+        GLFWwindow* window = windows.CreateWindow(
+            1280,
+            720,
+            "ManorEngineRendererLoader"
+        );
+
         glfwMakeContextCurrent(NULL);
     }
+
 
     void Renderer::RenderScene(GLFWwindow* window)
     {
@@ -78,20 +84,71 @@ namespace LANE
             glBindVertexArray(0);
         }
 
-        auto asset = assets.GetAsset<ShaderAsset>(69);
+        // --------------------------------------------------
+        // Start ImGui frame
+        // --------------------------------------------------
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        ImGui::SetCurrentContext(m_contexts[window]);
+
+        ImGui_ImplGlfw_NewFrame();
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui::NewFrame();
+
+        // --------------------------------------------------
+        // Your ImGui/UI code
+        // --------------------------------------------------
+
+        layers.UpdateImgui();
+
+        // --------------------------------------------------
+        // Render scene
+        // --------------------------------------------------
+
+        glClearColor(
+            0.1f,
+            0.1f,
+            0.1f,
+            1.0f
+        );
+
         glClear(GL_COLOR_BUFFER_BIT);
 
-        if (asset)
-            glUseProgram(asset->shaderProgram);
+        auto objects =
+            scenes.View<Components::Renderer>(
+                scenes.GetCurrentScene()
+            );
 
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
+        if (objects.size() != 0)
+        {
+            auto asset = assets.GetAsset<ShaderAsset>(69);
+
+            if (asset)
+                glUseProgram(asset->shaderProgram);
+
+            glBindVertexArray(vao);
+
+            glDrawArrays(
+                GL_TRIANGLES,
+                0,
+                3
+            );
+
+            glBindVertexArray(0);
+        }
+
+        // --------------------------------------------------
+        // Render ImGui on top of the scene
+        // --------------------------------------------------
+
+        ImGui::Render();
+
+        ImGui_ImplOpenGL3_RenderDrawData(
+            ImGui::GetDrawData()
+        );
 
         glfwSwapBuffers(window);
     }
+
 
     void Renderer::CreateShader(std::string path)
     {
@@ -99,5 +156,23 @@ namespace LANE
         json file = json::parse(f);
 
         assets.LoadAsset<ShaderAsset>(69, file, windows.GetWindow("ManorEngineRendererLoader").first);
+    }
+    void Renderer::RegisterWindowImgui(GLFWwindow *window)
+    {
+        IMGUI_CHECKVERSION();
+        ImGuiContext* context = ImGui::CreateContext();
+
+        ImGuiIO& io = ImGui::GetIO();
+        (void)io;
+
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+        ImGui::StyleColorsDark();
+
+        ImGui_ImplGlfw_InitForOpenGL(window,true);
+        ImGui_ImplOpenGL3_Init("#version 330");
+
+        m_contexts[window] = context;
+
     }
 } // namespace LANE
