@@ -44,10 +44,10 @@ namespace LANE
             return registry.all_of<T>(entity);
         }
 
-        template<typename T>
+        template<typename... T>
         auto View()
         {
-            return registry.view<T>();
+            return registry.view<T...>();
         }
 
         template<typename T>
@@ -67,10 +67,10 @@ namespace LANE
         void AddEntity(uint64_t sceneID, uint64_t id,std::string name = "New Object");
         entt::entity Get(uint64_t sceneID,uint64_t id);
 
-        template<typename T>
+        template<typename... T>
         auto View(uint64_t sceneID)
         {
-            return m_scenes[sceneID].View<T>();
+            return m_scenes[sceneID].View<T...>();
         }
 
         uint64_t GetCurrentScene();

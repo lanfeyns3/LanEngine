@@ -11,6 +11,7 @@ public:
     EditorLayer(LANE::Application& app)
         : application(app)
     {LANE::SeedRandom(44);}
+    
     void Update()
     {
         

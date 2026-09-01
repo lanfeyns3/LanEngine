@@ -101,27 +101,60 @@ namespace LANE
         glClear(GL_COLOR_BUFFER_BIT);
 
         auto objects =
-            scenes.View<Components::Renderer>(
+            scenes.View<Components::Renderer,Components::Transform>(
                 scenes.GetCurrentScene()
             );
 
-        if (objects.size() != 0)
+        for (auto object : objects)
         {
             auto asset = assets.GetAsset<ShaderAsset>(69);
-
-            if (asset)
-                glUseProgram(asset->shaderProgram);
-
+            
+            if (!asset)
+                continue;
+        
+            glUseProgram(asset->shaderProgram);
+        
+            auto& transform = scenes.GetComponent<Components::Transform>(
+                scenes.GetCurrentScene(),
+                object
+            );
+        
+            glm::mat4 model = glm::mat4(1.0f);
+        
+            model = glm::translate(
+                model,
+                transform.position
+            );
+        
+            model = glm::rotate(
+                model,
+                glm::radians(transform.rotation.z),
+                glm::vec3(0.0f, 0.0f, 1.0f)
+            );
+        
+            model = glm::scale(
+                model,
+                transform.scale
+            );
+        
+            glUniformMatrix4fv(
+                glGetUniformLocation(asset->shaderProgram, "model"),
+                1,
+                GL_FALSE,
+                glm::value_ptr(model)
+            );
+        
             glBindVertexArray(vao);
-
+        
             glDrawArrays(
                 GL_TRIANGLES,
                 0,
                 3
             );
-
+        
             glBindVertexArray(0);
         }
+
 
         ImGui::Render();
 
