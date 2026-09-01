@@ -33,8 +33,15 @@ namespace LANE
                 if (info.uuid == id)
                 {
                     registry.emplace<T>(entity,std::forward<_Args>(args)...);
+                    break;
                 }
             }
+        }
+
+        template<typename T>
+        bool HasComponent(entt::entity entity)
+        {
+            return registry.all_of<T>(entity);
         }
 
         template<typename T>
@@ -72,6 +79,17 @@ namespace LANE
         void AddComponent(uint64_t sceneID, uint64_t id, _Args&&... args)
         {
             m_scenes[sceneID].AddComponent<T>(id,std::forward<_Args>(args)...);
+        }
+        template<typename T>
+        T& GetComponent(uint64_t sceneID,entt::entity entity)
+        {
+            return m_scenes[sceneID].Get<T>(entity);
+        }
+
+        template<typename T>
+        bool HasComponent(uint64_t sceneID,entt::entity id)
+        {
+            return m_scenes[sceneID].HasComponent<T>(id);
         }
     private:
         uint64_t m_currentScene;

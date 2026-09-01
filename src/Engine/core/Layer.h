@@ -11,4 +11,4 @@ namespace LANE
         virtual void ImGuiUpdate() = 0;
         virtual void OnEvent(EventType eType, Event* event) = 0;
     };
-} // namespace LANE
+}

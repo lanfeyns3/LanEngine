@@ -7,6 +7,8 @@
 #include "AssetSystem.h"
 #include "SceneManager.h"
 
+#include "utils/Random.h"
+
 #include <string>
 #include <vector>
 

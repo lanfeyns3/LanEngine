@@ -43,7 +43,6 @@ namespace LANE
         glfwMakeContextCurrent(NULL);
     }
 
-
     void Renderer::RenderScene(GLFWwindow* window)
     {
         glfwMakeContextCurrent(window);
@@ -84,25 +83,13 @@ namespace LANE
             glBindVertexArray(0);
         }
 
-        // --------------------------------------------------
-        // Start ImGui frame
-        // --------------------------------------------------
-
         ImGui::SetCurrentContext(m_contexts[window]);
 
         ImGui_ImplGlfw_NewFrame();
         ImGui_ImplOpenGL3_NewFrame();
         ImGui::NewFrame();
 
-        // --------------------------------------------------
-        // Your ImGui/UI code
-        // --------------------------------------------------
-
         layers.UpdateImgui();
-
-        // --------------------------------------------------
-        // Render scene
-        // --------------------------------------------------
 
         glClearColor(
             0.1f,
@@ -136,10 +123,6 @@ namespace LANE
             glBindVertexArray(0);
         }
 
-        // --------------------------------------------------
-        // Render ImGui on top of the scene
-        // --------------------------------------------------
-
         ImGui::Render();
 
         ImGui_ImplOpenGL3_RenderDrawData(
@@ -149,14 +132,18 @@ namespace LANE
         glfwSwapBuffers(window);
     }
 
-
     void Renderer::CreateShader(std::string path)
     {
         std::ifstream f(path);
         json file = json::parse(f);
 
-        assets.LoadAsset<ShaderAsset>(69, file, windows.GetWindow("ManorEngineRendererLoader").first);
+        assets.LoadAsset<ShaderAsset>(
+            69,
+            file,
+            windows.GetWindow("ManorEngineRendererLoader").first
+        );
     }
+
     void Renderer::RegisterWindowImgui(GLFWwindow *window)
     {
         IMGUI_CHECKVERSION();
@@ -169,10 +156,9 @@ namespace LANE
 
         ImGui::StyleColorsDark();
 
-        ImGui_ImplGlfw_InitForOpenGL(window,true);
+        ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init("#version 330");
 
         m_contexts[window] = context;
-
     }
-} // namespace LANE
+}
