@@ -2,12 +2,12 @@
 
 namespace LANE
 {
-    void EBO::Create(std::vector<GLuint> indices, size_t size)
+    void EBO::Create(const std::vector<GLuint>& indices, size_t size)
     {
         glGenBuffers(1,&ebo);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,ebo);
 
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER,size,indices.data(),GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER,indices.size() * sizeof(GLuint),indices.data(),GL_STATIC_DRAW);
 
         Unload();
     }

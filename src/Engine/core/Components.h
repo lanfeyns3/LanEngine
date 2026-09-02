@@ -15,6 +15,8 @@
 #include "renderer/VBO.h"
 #include "renderer/EBO.h"
 
+#include <iostream>
+
 namespace LANE
 {
     namespace Components
@@ -99,11 +101,13 @@ namespace LANE
                     indices.push_back(static_cast<GLuint>(index.vertex_index));
                 }
 
-                ebo.Create(indices,indices.size());
+                indiceCount = indices.size();
+
+                ebo.Create(indices,indiceCount);
             }
 
             uint64_t uuid;
-
+            uint32_t indiceCount;
             VBO vbo;
             EBO ebo;
         };

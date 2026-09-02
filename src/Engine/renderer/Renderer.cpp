@@ -63,7 +63,7 @@ namespace LANE
         glClear(GL_COLOR_BUFFER_BIT);
 
         auto objects =
-            scenes.View<Components::Renderer,Components::Transform>(
+            scenes.View<Components::Renderer,Components::Transform,Components::Mesh>(
                 scenes.GetCurrentScene()
             );
             
@@ -105,10 +105,20 @@ namespace LANE
                 GL_FALSE,
                 glm::value_ptr(model)
             );
+
+            auto& mesh = scenes.GetComponent<Components::Mesh>(
+                scenes.GetCurrentScene(),
+                object
+            );
+
+            if (m_vaos[window].find(mesh.uuid) == m_vaos[window].end())
+                m_vaos[window][mesh.uuid].Create(mesh.vbo,mesh.ebo);
+
+            VAO& vao = m_vaos[window][mesh.uuid];
         
-            //vao.Load();
-            //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-            //vao.Unload();
+            vao.Load();
+            glDrawElements(GL_TRIANGLES, mesh.indiceCount, GL_UNSIGNED_INT, 0);
+            vao.Unload();
         }
 
 

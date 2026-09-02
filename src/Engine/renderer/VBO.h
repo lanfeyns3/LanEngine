@@ -8,7 +8,7 @@ namespace LANE
     class VBO
     {
     public:
-        void Create(std::vector<float> vertices, size_t size);
+        void Create(const std::vector<float>& vertices, size_t size);
         void Free();
         
         void Load();

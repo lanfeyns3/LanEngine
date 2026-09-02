@@ -68,7 +68,7 @@ public:
                     std::ifstream f("./bunny.mesh");
                     nlohmann::json file = nlohmann::json::parse(f);
 
-                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,file);
+                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,file); // TODO: Split Mesh component and off shore it to the asset manager
                     application.scenes.AddComponent<LANE::Components::Transform>(
                         application.scenes.GetCurrentScene(),
                         id,

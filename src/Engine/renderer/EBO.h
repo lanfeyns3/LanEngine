@@ -8,7 +8,7 @@ namespace LANE
     class EBO
     {
     public:
-        void Create(std::vector<GLuint> indices, size_t size);
+        void Create(const std::vector<GLuint>& indices, size_t size);
         void Free();
         
         void Load();

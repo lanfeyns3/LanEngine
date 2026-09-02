@@ -2,12 +2,12 @@
 
 namespace LANE
 {
-    void VBO::Create(std::vector<float> vertices, size_t size)
+    void VBO::Create(const std::vector<float>& vertices, size_t size)
     {
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-        glBufferData(GL_ARRAY_BUFFER, size, vertices.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
 
         glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
