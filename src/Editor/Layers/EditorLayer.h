@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "core/Application.h"
+#include <fstream>
 
 class EditorLayer : public LANE::Layer
 {
@@ -63,6 +64,11 @@ public:
                     uint64_t id = LANE::RandomUInt64();
                     application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
                     application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
+
+                    std::ifstream f("./bunny.mesh");
+                    nlohmann::json file = nlohmann::json::parse(f);
+
+                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,file);
                     application.scenes.AddComponent<LANE::Components::Transform>(
                         application.scenes.GetCurrentScene(),
                         id,

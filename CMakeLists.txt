@@ -19,7 +19,11 @@ FetchContent_Declare(
     GIT_TAG c
 )
 
-
+FetchContent_Declare(
+    tinyobjloader
+    GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
+    GIT_TAG release
+)
 
 FetchContent_Declare(
     nlohmann_json
@@ -54,6 +58,7 @@ FetchContent_MakeAvailable(
     nlohmann_json
     EnTT
     glm
+    tinyobjloader
     imgui
 )
 
@@ -89,6 +94,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     EnTT::EnTT
     glm
     imgui
+    tinyobjloader
 )
 
 add_executable(Editor

@@ -9,6 +9,11 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <inttypes.h>
+#include <tiny_obj_loader.h>
+#include <nlohmann/json.hpp>
+
+#include "renderer/VBO.h"
+#include "renderer/EBO.h"
 
 namespace LANE
 {
@@ -57,6 +62,50 @@ namespace LANE
                     ImGui::DragFloat3("Scale",glm::value_ptr(scale));
                 }
             }
+        };
+
+        struct Mesh
+        {
+            Mesh(nlohmann::json path)
+            {
+
+                tinyobj::attrib_t attrib;
+                std::vector<tinyobj::shape_t> shapes;
+                std::vector<tinyobj::material_t> materials;
+
+                std::string warn;
+                std::string err;
+
+                std::string meshSource = path["MeshSource"];
+
+                uuid = path["UUID"];
+
+                bool success = tinyobj::LoadObj(
+                    &attrib,
+                    &shapes,
+                    &materials,
+                    &warn,
+                    &err,
+                    meshSource.c_str()
+                );
+
+                size_t vertexCount = attrib.vertices.size() / 3;
+                vbo.Create(attrib.vertices,vertexCount);
+
+                std::vector<GLuint> indices;
+
+                for (const auto& index : shapes[0].mesh.indices)
+                {
+                    indices.push_back(static_cast<GLuint>(index.vertex_index));
+                }
+
+                ebo.Create(indices,indices.size());
+            }
+
+            uint64_t uuid;
+
+            VBO vbo;
+            EBO ebo;
         };
     } // namespace Components
     

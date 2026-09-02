@@ -1,13 +1,14 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <vector>
 
 namespace LANE
 {
     class VBO
     {
     public:
-        void Create(float vertices[], size_t size);
+        void Create(std::vector<float> vertices, size_t size);
         void Free();
         
         void Load();

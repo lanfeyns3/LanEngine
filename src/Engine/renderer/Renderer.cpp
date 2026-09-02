@@ -60,20 +60,6 @@ namespace LANE
             1.0f
         );
 
-        if (tempAdd == false)
-        {
-            float vertices[] {
-                 0.0f,  0.5f, 0.0f,  // top
-                -0.5f, -0.5f, 0.0f,  // bottom-left
-                 0.5f, -0.5f, 0.0f   // bottom-right
-            };
-
-            vbo.Create(vertices,sizeof(vertices));
-            vao.Create(vbo);
-
-            tempAdd = true;
-        }
-
         glClear(GL_COLOR_BUFFER_BIT);
 
         auto objects =
@@ -120,15 +106,9 @@ namespace LANE
                 glm::value_ptr(model)
             );
         
-            vao.Load();
-        
-            glDrawArrays(
-                GL_TRIANGLES,
-                0,
-                3
-            );
-        
-            vao.Unload();
+            //vao.Load();
+            //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+            //vao.Unload();
         }
 
 

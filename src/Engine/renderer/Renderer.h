@@ -23,6 +23,7 @@
 
 #include "VAO.h"
 #include "VBO.h"
+#include "EBO.h"
 
 namespace LANE
 {
@@ -48,9 +49,7 @@ namespace LANE
         WindowSystem& windows;
     private:
         std::unordered_map<GLFWwindow *,ImGuiContext*> m_contexts;
-
-        VAO vao;
-        VBO vbo;
+        std::unordered_map<GLFWwindow*,std::unordered_map<uint64_t,VAO>> m_vaos;
 
         bool tempAdd = false;
     };
