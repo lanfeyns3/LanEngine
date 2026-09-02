@@ -21,6 +21,9 @@
 #include "core/LayerSystem.h"
 #include "core/WindowSystem.h"
 
+#include "VAO.h"
+#include "VBO.h"
+
 namespace LANE
 {
     class Renderer
@@ -46,9 +49,10 @@ namespace LANE
     private:
         std::unordered_map<GLFWwindow *,ImGuiContext*> m_contexts;
 
-        GLuint vao = 0; // TODO: seperate
-        GLuint vbo = 0; // TODO: seperate
+        VAO vao;
+        VBO vbo;
 
+        bool tempAdd = false;
     };
 
 } // namespace LANE

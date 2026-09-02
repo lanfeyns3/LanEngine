@@ -68,7 +68,7 @@ namespace LANE
         entt::entity Get(uint64_t sceneID,uint64_t id);
 
         template<typename... T>
-        auto View(uint64_t sceneID)
+        decltype(auto) View(uint64_t sceneID)
         {
             return m_scenes[sceneID].View<T...>();
         }

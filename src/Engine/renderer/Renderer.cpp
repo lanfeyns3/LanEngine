@@ -30,9 +30,7 @@ namespace LANE
         : assets(Assets),
           scenes(Scenes),
           layers(Layers),
-          windows(Windows),
-          vao(0),
-          vbo(0)
+          windows(Windows)
     {
         GLFWwindow* window = windows.CreateWindow(
             1280,
@@ -46,42 +44,6 @@ namespace LANE
     void Renderer::RenderScene(GLFWwindow* window)
     {
         glfwMakeContextCurrent(window);
-
-        if (vao == 0 || vbo == 0)
-        {
-            float vertices[] = {
-                 0.0f,  0.5f,
-                -0.5f, -0.5f,
-                 0.5f, -0.5f
-            };
-
-            glGenVertexArrays(1, &vao);
-            glGenBuffers(1, &vbo);
-
-            glBindVertexArray(vao);
-
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                sizeof(vertices),
-                vertices,
-                GL_STATIC_DRAW
-            );
-
-            glVertexAttribPointer(
-                0,
-                2,
-                GL_FLOAT,
-                GL_FALSE,
-                2 * sizeof(float),
-                nullptr
-            );
-
-            glEnableVertexAttribArray(0);
-
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
-        }
 
         ImGui::SetCurrentContext(m_contexts[window]);
 
@@ -98,17 +60,31 @@ namespace LANE
             1.0f
         );
 
+        if (tempAdd == false)
+        {
+            float vertices[] {
+                 0.0f,  0.5f, 0.0f,  // top
+                -0.5f, -0.5f, 0.0f,  // bottom-left
+                 0.5f, -0.5f, 0.0f   // bottom-right
+            };
+
+            vbo.Create(vertices,sizeof(vertices));
+            vao.Create(vbo);
+
+            tempAdd = true;
+        }
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         auto objects =
             scenes.View<Components::Renderer,Components::Transform>(
                 scenes.GetCurrentScene()
             );
-
+            
         for (auto object : objects)
         {
             auto asset = assets.GetAsset<ShaderAsset>(69);
-            
+
             if (!asset)
                 continue;
         
@@ -144,7 +120,7 @@ namespace LANE
                 glm::value_ptr(model)
             );
         
-            glBindVertexArray(vao);
+            vao.Load();
         
             glDrawArrays(
                 GL_TRIANGLES,
@@ -152,7 +128,7 @@ namespace LANE
                 3
             );
         
-            glBindVertexArray(0);
+            vao.Unload();
         }
 
 
