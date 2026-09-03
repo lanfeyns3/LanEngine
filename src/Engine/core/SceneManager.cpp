@@ -27,4 +27,8 @@ namespace LANE
         return m_currentScene;
     }
 
+    Components::Camera& SceneManager::GetMainCamera()
+    {
+        return m_scenes[m_currentScene].GetMainCamera();
+    }
 }

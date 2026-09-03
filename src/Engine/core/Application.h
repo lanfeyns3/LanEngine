@@ -8,6 +8,7 @@
 #include "SceneManager.h"
 
 #include "utils/Random.h"
+#include "utils/Time.h"
 
 #include <string>
 #include <vector>
@@ -78,6 +79,9 @@ namespace LANE
         EventSystem eventSystem;
         AssetSystem assets;
         SceneManager scenes;
+
+        Time frameTime;
+        float prevFrameTime = 0;
 
         std::string appName = "LANE";
     };

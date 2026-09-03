@@ -53,6 +53,13 @@ namespace LANE
 
         layers.UpdateImgui();
 
+        int width, height;
+        glfwGetFramebufferSize(window, &width, &height);
+
+        glViewport(0, 0, width, height);
+
+        glEnable(GL_DEPTH_TEST);
+
         glClearColor(
             0.1f,
             0.1f,
@@ -60,67 +67,219 @@ namespace LANE
             1.0f
         );
 
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(
+            GL_COLOR_BUFFER_BIT |
+            GL_DEPTH_BUFFER_BIT
+        );
 
         auto objects =
-            scenes.View<Components::Renderer,Components::Transform,Components::Mesh>(
+            scenes.View<
+                Components::Renderer,
+                Components::Transform,
+                Components::Mesh
+            >(
                 scenes.GetCurrentScene()
             );
-            
+
+        Components::Camera& mainCamera =
+            scenes.GetMainCamera();
+
+        /*
+         * ----------------------------------------
+         * CAMERA
+         * ----------------------------------------
+         */
+
+        glm::vec3 cameraPosition =
+            mainCamera.position;
+
+        glm::vec3 cameraRotation =
+            mainCamera.rotation;
+
+        // Build camera rotation.
+        glm::mat4 cameraRotationMatrix =
+            glm::mat4(1.0f);
+
+        cameraRotationMatrix = glm::rotate(
+            cameraRotationMatrix,
+            glm::radians(cameraRotation.x),
+            glm::vec3(1.0f, 0.0f, 0.0f)
+        );
+
+        cameraRotationMatrix = glm::rotate(
+            cameraRotationMatrix,
+            glm::radians(cameraRotation.y),
+            glm::vec3(0.0f, 1.0f, 0.0f)
+        );
+
+        cameraRotationMatrix = glm::rotate(
+            cameraRotationMatrix,
+            glm::radians(cameraRotation.z),
+            glm::vec3(0.0f, 0.0f, 1.0f)
+        );
+
+        /*
+         * Camera looks down -Z in OpenGL.
+         */
+
+        glm::vec3 forward =
+            glm::vec3(
+                cameraRotationMatrix *
+                glm::vec4(0.0f, 0.0f, -1.0f, 0.0f)
+            );
+
+        glm::vec3 up =
+            glm::vec3(
+                cameraRotationMatrix *
+                glm::vec4(0.0f, 1.0f, 0.0f, 0.0f)
+            );
+
+        glm::mat4 view =
+            glm::lookAt(
+                cameraPosition,
+                cameraPosition + forward,
+                up
+            );
+
+        /*
+         * ----------------------------------------
+         * PROJECTION
+         * ----------------------------------------
+         */
+
+        float aspect =
+            static_cast<float>(width) /
+            static_cast<float>(height);
+
+        
+        glm::mat4 projection =
+            glm::perspective(
+                glm::radians(mainCamera.fov),
+                aspect,
+                mainCamera.nearPlane,
+                mainCamera.farPlane
+            );
+
+        /*
+         * ----------------------------------------
+         * OBJECTS
+         * ----------------------------------------
+         */
+
         for (auto object : objects)
         {
-            auto asset = assets.GetAsset<ShaderAsset>(69);
+            auto asset =
+                assets.GetAsset<ShaderAsset>(69);
 
             if (!asset)
                 continue;
-        
+
             glUseProgram(asset->shaderProgram);
-        
-            auto& transform = scenes.GetComponent<Components::Transform>(
-                scenes.GetCurrentScene(),
-                object
-            );
-        
-            glm::mat4 model = glm::mat4(1.0f);
-        
+
+            auto& transform =
+                scenes.GetComponent<Components::Transform>(
+                    scenes.GetCurrentScene(),
+                    object
+                );
+
+            /*
+             * MODEL MATRIX
+             */
+
+            glm::mat4 model =
+                glm::mat4(1.0f);
+
             model = glm::translate(
                 model,
                 transform.position
             );
-        
+
+            model = glm::rotate(
+                model,
+                glm::radians(transform.rotation.x),
+                glm::vec3(1.0f, 0.0f, 0.0f)
+            );
+
+            model = glm::rotate(
+                model,
+                glm::radians(transform.rotation.y),
+                glm::vec3(0.0f, 1.0f, 0.0f)
+            );
+
             model = glm::rotate(
                 model,
                 glm::radians(transform.rotation.z),
                 glm::vec3(0.0f, 0.0f, 1.0f)
             );
-        
+
             model = glm::scale(
                 model,
                 transform.scale
             );
-        
+
+            /*
+             * SEND MATRICES TO SHADER
+             */
+
             glUniformMatrix4fv(
-                glGetUniformLocation(asset->shaderProgram, "model"),
+                glGetUniformLocation(
+                    asset->shaderProgram,
+                    "model"
+                ),
                 1,
                 GL_FALSE,
                 glm::value_ptr(model)
             );
 
-            auto& mesh = scenes.GetComponent<Components::Mesh>(
-                scenes.GetCurrentScene(),
-                object
+            glUniformMatrix4fv(
+                glGetUniformLocation(
+                    asset->shaderProgram,
+                    "view"
+                ),
+                1,
+                GL_FALSE,
+                glm::value_ptr(view)
             );
 
-            if (m_vaos[window].find(mesh.uuid) == m_vaos[window].end())
-                m_vaos[window][mesh.uuid].Create(mesh.vbo,mesh.ebo);
+            glUniformMatrix4fv(
+                glGetUniformLocation(
+                    asset->shaderProgram,
+                    "projection"
+                ),
+                1,
+                GL_FALSE,
+                glm::value_ptr(projection)
+            );
 
-            VAO& vao = m_vaos[window][mesh.uuid];
-        
+            auto& mesh =
+                scenes.GetComponent<Components::Mesh>(
+                    scenes.GetCurrentScene(),
+                    object
+                );
+
+            if (m_vaos[window].find(mesh.uuid) ==
+                m_vaos[window].end())
+            {
+                m_vaos[window][mesh.uuid].Create(
+                    mesh.vbo,
+                    mesh.ebo
+                );
+            }
+
+            VAO& vao =
+                m_vaos[window][mesh.uuid];
+
             vao.Load();
-            glDrawElements(GL_TRIANGLES, mesh.indiceCount, GL_UNSIGNED_INT, 0);
+
+            glDrawElements(
+                GL_TRIANGLES,
+                mesh.indiceCount,
+                GL_UNSIGNED_INT,
+                0
+            );
+
             vao.Unload();
         }
-
 
         ImGui::Render();
 

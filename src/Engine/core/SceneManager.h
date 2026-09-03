@@ -56,7 +56,13 @@ namespace LANE
             return registry.get<T>(entity);
         }
 
+        Components::Camera& GetMainCamera()
+        {
+            return Get<Components::Camera>(m_mainCamera);
+        }
+
     private:
+        entt::entity m_mainCamera;
         entt::registry registry;
     };
 
@@ -74,6 +80,7 @@ namespace LANE
         }
 
         uint64_t GetCurrentScene();
+        Components::Camera& GetMainCamera();
         
         template<typename T, typename... _Args>
         void AddComponent(uint64_t sceneID, uint64_t id, _Args&&... args)

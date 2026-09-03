@@ -17,12 +17,12 @@ namespace LANE
             m_layers[id] = layer;
         }
 
-        void UpdateLayers()
+        void UpdateLayers(float dt)
         {
             std::lock_guard<std::mutex> lock(layerMutex);
             for (auto layer : m_layers)
             {
-                layer.second->Update();
+                layer.second->Update(dt);
             }
         }
 

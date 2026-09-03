@@ -78,5 +78,12 @@ namespace LANE
             newEvent->type = KeyEventType::KeyStroke;
             m_events.AddEvent(EventType::Key, (Event*)newEvent);
         }
+        else if (action == GLFW_RELEASE)
+        {
+            KeyEvent* newEvent = new KeyEvent();
+            newEvent->key = key;
+            newEvent->type = KeyEventType::KeyReleased;
+            m_events.AddEvent(EventType::Key, (Event*)newEvent);
+        }
     }
 }
