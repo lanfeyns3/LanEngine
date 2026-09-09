@@ -111,6 +111,23 @@ public:
                         glm::vec3(1.0f)
                     );
                 }
+                else if (keyEvent->key == GLFW_KEY_LEFT_ALT)
+                {
+                    std::cout << "Add new Light\n";
+                    uint64_t id = LANE::RandomUInt64();
+                    application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
+                    application.scenes.AddComponent<LANE::Components::Light>(
+                        application.scenes.GetCurrentScene(),
+                        id
+                    );
+                    application.scenes.AddComponent<LANE::Components::Transform>(
+                        application.scenes.GetCurrentScene(),
+                        id,
+                        glm::vec3(0.0f),
+                        glm::vec3(0.0f),
+                        glm::vec3(1.0f)
+                    );
+                }
                 else if (keyEvent->key == GLFW_KEY_C)
                 {
                     std::cout << "Size: " << application.scenes.View<LANE::Components::Info>(application.scenes.GetCurrentScene()).size();

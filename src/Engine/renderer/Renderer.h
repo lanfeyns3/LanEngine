@@ -51,6 +51,8 @@ namespace LANE
         std::unordered_map<GLFWwindow *,ImGuiContext*> m_contexts;
         std::unordered_map<GLFWwindow*,std::unordered_map<uint64_t,VAO>> m_vaos;
 
+        GLuint lightUBO;
+
         bool tempAdd = false;
     };
 

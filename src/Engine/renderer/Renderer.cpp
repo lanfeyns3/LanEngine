@@ -4,6 +4,15 @@
 
 using json = nlohmann::json;
 
+struct GPULight
+{
+    glm::vec3 position;
+    float radius;
+
+    glm::vec3 color;
+    float _padding;
+};
+
 namespace LANE
 {
     std::vector<char> readFile(const char* filename)
@@ -37,6 +46,19 @@ namespace LANE
             720,
             "ManorEngineRendererLoader"
         );
+
+        glGenBuffers(1, &lightUBO);
+        glBindBuffer(GL_UNIFORM_BUFFER, lightUBO);
+
+        glBufferData(
+            GL_UNIFORM_BUFFER,
+            sizeof(GPULight),              // size in bytes
+            nullptr,
+            GL_DYNAMIC_DRAW
+        );
+
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
 
         glfwMakeContextCurrent(NULL);
     }
@@ -165,6 +187,38 @@ namespace LANE
          * OBJECTS
          * ----------------------------------------
          */
+
+        // setup lights. TODO: allow more lights
+        GPULight gpuLight;
+
+        auto lightsView = scenes.View<LANE::Components::Light,LANE::Components::Transform>(scenes.GetCurrentScene());
+
+        for (auto lightE : lightsView)
+        {
+            auto& light = scenes.GetComponent<LANE::Components::Light>(scenes.GetCurrentScene(),lightE);
+            auto& transform = scenes.GetComponent<LANE::Components::Transform>(scenes.GetCurrentScene(),lightE);
+
+            gpuLight.color = light.color;
+            gpuLight.radius = light.radius;
+            gpuLight.position = transform.position;
+
+            break;
+        }
+
+        glBufferSubData(
+            GL_UNIFORM_BUFFER,
+            0,
+            sizeof(GPULight),
+            &gpuLight
+        );
+
+        glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        glBindBufferBase(
+            GL_UNIFORM_BUFFER,
+            0,
+            lightUBO
+        );
 
         for (auto object : objects)
         {

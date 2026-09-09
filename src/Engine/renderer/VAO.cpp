@@ -11,8 +11,10 @@ namespace LANE
         vbo.Load();
         ebo.Load();
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, 0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (char*)(sizeof(float) * 3));
         glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
     }
 
     void VAO::Free()
