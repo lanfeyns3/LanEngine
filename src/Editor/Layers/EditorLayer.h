@@ -108,7 +108,7 @@ public:
                     application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
                     application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
 
-                    std::ifstream f("./bunny.mesh");
+                    std::ifstream f("./torus.mesh");
                     nlohmann::json file = nlohmann::json::parse(f);
 
                     application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,file); // TODO: Split Mesh component and off shore it to the asset manager
