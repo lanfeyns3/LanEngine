@@ -48,7 +48,18 @@ namespace LANE
         struct Light
         {
             float radius = 10;
+            float intensity = .5;
             glm::vec3 color{255.0f};
+
+            void RenderImGui()
+            {
+                if (ImGui::CollapsingHeader("Light", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    ImGui::DragFloat("Radius",&radius);
+                    ImGui::DragFloat("Intensity",&intensity);
+                    ImGui::DragFloat3("Color",glm::value_ptr(color));
+                }
+            }
         };
 
         struct Transform

@@ -8,6 +8,7 @@ struct GPULight
 {
     glm::vec3 position;
     float radius;
+    float intensity;
 
     glm::vec3 color;
     float _padding;
@@ -189,7 +190,7 @@ namespace LANE
          */
 
         // setup lights. TODO: allow more lights
-        GPULight gpuLight;
+        GPULight gpuLight{};
 
         auto lightsView = scenes.View<LANE::Components::Light,LANE::Components::Transform>(scenes.GetCurrentScene());
 
@@ -199,11 +200,14 @@ namespace LANE
             auto& transform = scenes.GetComponent<LANE::Components::Transform>(scenes.GetCurrentScene(),lightE);
 
             gpuLight.color = light.color;
+            gpuLight.intensity = light.intensity;
             gpuLight.radius = light.radius;
             gpuLight.position = transform.position;
 
             break;
         }
+
+        glBindBuffer(GL_UNIFORM_BUFFER, lightUBO);
 
         glBufferSubData(
             GL_UNIFORM_BUFFER,
@@ -219,6 +223,7 @@ namespace LANE
             0,
             lightUBO
         );
+
 
         for (auto object : objects)
         {
@@ -369,7 +374,7 @@ namespace LANE
         ImGui::StyleColorsDark();
 
         ImGui_ImplGlfw_InitForOpenGL(window, true);
-        ImGui_ImplOpenGL3_Init("#version 330");
+        ImGui_ImplOpenGL3_Init("#version 460");
 
         m_contexts[window] = context;
     }

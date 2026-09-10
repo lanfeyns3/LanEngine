@@ -26,7 +26,12 @@ public:
         
         float speed = 1.0f;
 
-        std::cout << dt << "\n";
+        if (selectedEntity != entt::null)
+        {
+            auto& selectedTransform = application.scenes.GetComponent<LANE::Components::Transform>(application.scenes.GetCurrentScene(),selectedEntity);
+
+            selectedTransform.rotation.y += 25 * dt;
+        }
         
         if (moveForward)
             transform.position.z += speed * dt;
@@ -79,6 +84,10 @@ public:
             if (application.scenes.HasComponent<LANE::Components::Transform>(application.scenes.GetCurrentScene(),selectedEntity))
             {
                 application.scenes.GetComponent<LANE::Components::Transform>(application.scenes.GetCurrentScene(),selectedEntity).RenderImGui();
+            }
+            if (application.scenes.HasComponent<LANE::Components::Light>(application.scenes.GetCurrentScene(),selectedEntity))
+            {
+                application.scenes.GetComponent<LANE::Components::Light>(application.scenes.GetCurrentScene(),selectedEntity).RenderImGui();
             }
         }
         ImGui::End();
@@ -200,7 +209,7 @@ private:
     LANE::Application& application;
 
     uint64_t selected = 0;
-    entt::entity selectedEntity;
+    entt::entity selectedEntity = entt::null;
     uint64_t editorCameraID;
 
     bool moveForward = false;
