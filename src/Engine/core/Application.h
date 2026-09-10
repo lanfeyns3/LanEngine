@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include <nfd.h>
+
 namespace LANE
 {
     class Application
@@ -21,6 +23,7 @@ namespace LANE
         Application()
             : renderer(assets,scenes,layers,windows), windows(eventSystem),eventSystem(layers)
         {
+            NFD_Init();
             scenes.AddScene(0);
         }
 

@@ -49,6 +49,14 @@ FetchContent_Declare(
     GIT_TAG docking
 )
 
+FetchContent_Declare(
+    nfd
+    GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
+    GIT_TAG master
+)
+
+
+
 set(GLM_BUILD_TESTS OFF)
 set(IMGUI_ENABLE_OPENGL3 ON CACHE BOOL "Enable OpenGL3" FORCE)
 
@@ -60,6 +68,7 @@ FetchContent_MakeAvailable(
     glm
     tinyobjloader
     imgui
+    nfd
 )
 
 find_package(OpenGL REQUIRED)
@@ -95,6 +104,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     glm
     imgui
     tinyobjloader
+    nfd
 )
 
 add_executable(Editor

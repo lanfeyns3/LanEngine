@@ -227,6 +227,18 @@ namespace LANE
 
         for (auto object : objects)
         {
+            auto& mesh =
+                scenes.GetComponent<Components::Mesh>(
+                    scenes.GetCurrentScene(),
+                    object
+                );
+            auto meshAsset = assets.GetAsset<MeshAsset>(mesh.uuid);
+
+            if (meshAsset == nullptr)
+            {
+                break;
+            }
+            
             auto asset =
                 assets.GetAsset<ShaderAsset>(69);
 
@@ -309,19 +321,13 @@ namespace LANE
                 GL_FALSE,
                 glm::value_ptr(projection)
             );
-
-            auto& mesh =
-                scenes.GetComponent<Components::Mesh>(
-                    scenes.GetCurrentScene(),
-                    object
-                );
-
+            
             if (m_vaos[window].find(mesh.uuid) ==
                 m_vaos[window].end())
             {
                 m_vaos[window][mesh.uuid].Create(
-                    mesh.vbo,
-                    mesh.ebo
+                    meshAsset->vbo,
+                    meshAsset->ebo
                 );
             }
 
@@ -332,7 +338,7 @@ namespace LANE
 
             glDrawElements(
                 GL_TRIANGLES,
-                mesh.indiceCount,
+                meshAsset->indiceCount,
                 GL_UNSIGNED_INT,
                 0
             );

@@ -28,9 +28,23 @@ public:
 
         if (selectedEntity != entt::null)
         {
-            auto& selectedTransform = application.scenes.GetComponent<LANE::Components::Transform>(application.scenes.GetCurrentScene(),selectedEntity);
+            auto& selectedTransform = application.scenes.GetComponent<LANE::Components::Transform>(scene,selectedEntity);
 
             selectedTransform.rotation.y += 25 * dt;
+        }
+
+        for (auto meshEntity : application.scenes.View<LANE::Components::Mesh>(scene))
+        {
+            auto& mesh = application.scenes.GetComponent<LANE::Components::Mesh>(scene,meshEntity);
+
+            if (mesh.pathUpdate)
+            {
+                std::ifstream f(mesh.path);
+                nlohmann::json file = nlohmann::json::parse(f);
+
+                application.assets.LoadAsset<LANE::MeshAsset>(mesh.uuid,file);
+                mesh.pathUpdate = false;
+            }
         }
         
         if (moveForward)
@@ -89,6 +103,10 @@ public:
             {
                 application.scenes.GetComponent<LANE::Components::Light>(application.scenes.GetCurrentScene(),selectedEntity).RenderImGui();
             }
+            if (application.scenes.HasComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),selectedEntity))
+            {
+                application.scenes.GetComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),selectedEntity).RenderImGui();
+            }
         }
         ImGui::End();
     }
@@ -108,10 +126,7 @@ public:
                     application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
                     application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
 
-                    std::ifstream f("./torus.mesh");
-                    nlohmann::json file = nlohmann::json::parse(f);
-
-                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,file); // TODO: Split Mesh component and off shore it to the asset manager
+                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./torus.mesh"); // TODO: Split Mesh component and off shore it to the asset manager
                     application.scenes.AddComponent<LANE::Components::Transform>(
                         application.scenes.GetCurrentScene(),
                         id,

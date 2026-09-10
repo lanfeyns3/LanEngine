@@ -11,11 +11,14 @@
 #include <inttypes.h>
 #include <tiny_obj_loader.h>
 #include <nlohmann/json.hpp>
+#include <nfd.h>
 
 #include "renderer/VBO.h"
 #include "renderer/EBO.h"
+#include "AssetSystem.h"
 
 #include <iostream>
+#include <fstream>
 
 namespace LANE
 {
@@ -49,7 +52,7 @@ namespace LANE
         {
             float radius = 10;
             float intensity = .5;
-            glm::vec3 color{255.0f};
+            glm::vec3 color{1.0f};
 
             void RenderImGui()
             {
@@ -95,70 +98,65 @@ namespace LANE
 
         struct Mesh
         {
-            Mesh(nlohmann::json path)
+            Mesh(AssetSystem& assets,std::string Path)
             {
+                path = Path;
 
-                tinyobj::attrib_t attrib;
-                std::vector<tinyobj::shape_t> shapes;
-                std::vector<tinyobj::material_t> materials;
+                std::ifstream f(path);
+                nlohmann::json file = nlohmann::json::parse(f);
 
-                std::string warn;
-                std::string err;
+                assets.LoadAsset<MeshAsset>(file["UUID"],file);
+                uuid = file["UUID"];
+                loaded = true;
+            }
 
-                std::string meshSource = path["MeshSource"];
-
-                uuid = path["UUID"];
-
-                bool success = tinyobj::LoadObj(
-                    &attrib,
-                    &shapes,
-                    &materials,
-                    &warn,
-                    &err,
-                    meshSource.c_str()
-                );
-
-                std::vector<float> data;
-                std::vector<GLuint> indices;
-
-                for (const auto& index : shapes[0].mesh.indices)
+            void RenderImGui()
+            {
+                if (ImGui::CollapsingHeader("Mesh", ImGuiTreeNodeFlags_DefaultOpen))
                 {
-                    const size_t vi = 3 * index.vertex_index;
-                
-                    data.emplace_back(attrib.vertices.at(vi + 0));
-                    data.emplace_back(attrib.vertices.at(vi + 1));
-                    data.emplace_back(attrib.vertices.at(vi + 2));
-                
-                    if (index.normal_index >= 0)
+                    std::string format = std::format("Path: {}",path);
+                    ImGui::InputText(
+                        "##Path",
+                        &format,
+                        ImGuiInputTextFlags_ReadOnly
+                    );
+                    ImGui::SameLine();
+                    if (ImGui::Button("Open"))
                     {
-                        const size_t ni = 3 * index.normal_index;
-                    
-                        data.emplace_back(attrib.normals.at(ni + 0));
-                        data.emplace_back(attrib.normals.at(ni + 1));
-                        data.emplace_back(attrib.normals.at(ni + 2));
+                        nfdu8char_t *outPath;
+                        nfdu8filteritem_t filters[1] = { { "Lane Mesh", "mesh" }};
+                        nfdopendialogu8args_t args = {0};
+                        args.filterList = filters;
+                        args.filterCount = 1;
+                        nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
+
+                        switch (result)
+                        {
+                        case NFD_OKAY:
+                        {
+                            path = outPath;
+                            NFD_FreePathU8(outPath);
+
+                            std::ifstream f(path);
+                            nlohmann::json file = nlohmann::json::parse(f);
+
+                            uuid = file["UUID"];
+                            pathUpdate = true;
+                            break;
+                        }
+                        
+                        default:
+                            break;
+                        }
                     }
-                    else
-                    {
-                        // No normal in the OBJ.
-                        data.emplace_back(0.0f);
-                        data.emplace_back(0.0f);
-                        data.emplace_back(0.0f);
-                    }
-                
-                    indices.push_back(static_cast<GLuint>(indices.size()));
                 }
-
-                vbo.Create(data,data.size());
-
-                indiceCount = indices.size();
-
-                ebo.Create(indices,indiceCount);
             }
 
             uint64_t uuid;
-            uint32_t indiceCount;
-            VBO vbo;
-            EBO ebo;
+            std::string path;
+
+            bool pathUpdate = false;
+            bool loaded = false;
         };
     } // namespace Components
     

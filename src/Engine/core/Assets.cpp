@@ -5,6 +5,8 @@
 #include <string>
 #include <iostream>
 
+#include <tiny_obj_loader.h>
+
 namespace LANE
 {
     static void PrintOpenGLError(const char* location)
@@ -490,5 +492,60 @@ namespace LANE
         );
 
         glfwMakeContextCurrent(nullptr);
+    }
+    void MeshAsset::Load(nlohmann::json f)
+    {
+        tinyobj::attrib_t attrib;
+
+        std::vector<tinyobj::shape_t> shapes;
+        std::vector<tinyobj::material_t> materials;
+
+        std::string warn;
+        std::string err;
+
+        std::string meshSource = f["MeshSource"];
+        uuid = f["UUID"];
+
+        bool success = tinyobj::LoadObj(
+            &attrib,
+            &shapes,
+            &materials,
+            &warn,
+            &err,
+            meshSource.c_str()
+        );
+
+        std::vector<float> data;
+        std::vector<GLuint> indices;
+        
+        for (const auto& index : shapes[0].mesh.indices)
+        {
+            const size_t vi = 3 * index.vertex_index;
+        
+            data.emplace_back(attrib.vertices.at(vi + 0));
+            data.emplace_back(attrib.vertices.at(vi + 1));
+            data.emplace_back(attrib.vertices.at(vi + 2));
+        
+            if (index.normal_index >= 0)
+            {
+                const size_t ni = 3 * index.normal_index;
+            
+                data.emplace_back(attrib.normals.at(ni + 0));
+                data.emplace_back(attrib.normals.at(ni + 1));
+                data.emplace_back(attrib.normals.at(ni + 2));
+            }
+            else
+            {
+                // No normal in the OBJ.
+                data.emplace_back(0.0f);
+                data.emplace_back(0.0f);
+                data.emplace_back(0.0f);
+            }
+        
+            indices.push_back(static_cast<GLuint>(indices.size()));
+        }
+        vbo.Create(data,data.size());
+        indiceCount = indices.size();
+        ebo.Create(indices,indiceCount);
     }
 }
