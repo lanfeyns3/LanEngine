@@ -235,9 +235,7 @@ namespace LANE
             auto meshAsset = assets.GetAsset<MeshAsset>(mesh.uuid);
 
             if (meshAsset == nullptr || meshAsset->loaded == false)
-            {
-                break;
-            }
+                continue;
             
             auto asset =
                 assets.GetAsset<ShaderAsset>(69);
