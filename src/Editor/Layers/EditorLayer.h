@@ -6,6 +6,14 @@
 #include "core/Application.h"
 #include <fstream>
 
+void tempThread()
+{
+    for (int i = 0; i < 100000; i++)
+    {
+        std::cout << i << "\n";
+    }
+}
+
 class EditorLayer : public LANE::Layer
 {
 public:
@@ -42,7 +50,11 @@ public:
                 std::ifstream f(mesh.path);
                 nlohmann::json file = nlohmann::json::parse(f);
 
-                application.assets.LoadAsset<LANE::MeshAsset>(mesh.uuid,file);
+                const char* newText = (const char*)malloc(mesh.path.size() + 1);
+                std::memcpy((char*)newText, mesh.path.c_str(), mesh.path.size() + 1);
+
+                application.assets.LoadAssetAsync<LANE::MeshAsset>(file["UUID"],newText);
+                mesh.uuid = file["UUID"];
                 mesh.pathUpdate = false;
             }
         }
@@ -126,7 +138,7 @@ public:
                     application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
                     application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
 
-                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./torus.mesh"); // TODO: Split Mesh component and off shore it to the asset manager
+                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./monkey.mesh");
                     application.scenes.AddComponent<LANE::Components::Transform>(
                         application.scenes.GetCurrentScene(),
                         id,
@@ -154,7 +166,7 @@ public:
                 }
                 else if (keyEvent->key == GLFW_KEY_C)
                 {
-                    std::cout << "Size: " << application.scenes.View<LANE::Components::Info>(application.scenes.GetCurrentScene()).size();
+                    application.threads.AddThread([]() {tempThread();});
                 }
                 else
                 {

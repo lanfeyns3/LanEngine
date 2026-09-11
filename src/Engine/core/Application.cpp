@@ -21,6 +21,8 @@ namespace LANE
 
             renderer.RenderScene(windows.GetMainWindow());
         }
+
+        threads.JoinThreads();
         
     }
 }

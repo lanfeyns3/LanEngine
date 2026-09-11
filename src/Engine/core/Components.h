@@ -105,9 +105,11 @@ namespace LANE
                 std::ifstream f(path);
                 nlohmann::json file = nlohmann::json::parse(f);
 
-                assets.LoadAsset<MeshAsset>(file["UUID"],file);
+                const char* newText = (const char*)malloc(path.size() + 1);
+                std::memcpy((char*)newText, path.c_str(), path.size() + 1);
+
+                assets.LoadAssetAsync<MeshAsset>(file["UUID"],newText);
                 uuid = file["UUID"];
-                loaded = true;
             }
 
             void RenderImGui()
@@ -156,7 +158,6 @@ namespace LANE
             std::string path;
 
             bool pathUpdate = false;
-            bool loaded = false;
         };
     } // namespace Components
     

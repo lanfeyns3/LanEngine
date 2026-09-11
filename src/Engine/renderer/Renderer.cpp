@@ -234,7 +234,7 @@ namespace LANE
                 );
             auto meshAsset = assets.GetAsset<MeshAsset>(mesh.uuid);
 
-            if (meshAsset == nullptr)
+            if (meshAsset == nullptr || meshAsset->loaded == false)
             {
                 break;
             }

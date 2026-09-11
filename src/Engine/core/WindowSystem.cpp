@@ -2,6 +2,18 @@
 #include <iostream>
 #include <cstring>
 
+void APIENTRY glDebugCallback(
+    GLenum source,
+    GLenum type,
+    GLuint id,
+    GLenum severity,
+    GLsizei length,
+    const GLchar* message,
+    const void* userParam)
+{
+    std::cerr << "OpenGL: " << message << '\n';
+}
+
 namespace LANE
 {
     GLFWwindow* WindowSystem::CreateWindow(uint32_t width, uint32_t height, const char *name)
@@ -19,7 +31,10 @@ namespace LANE
         
         GLFWwindow* window = nullptr;
         if (strcmp(name, "ManorEngineRendererLoader") == 0)
+        {
+            //glfwWindowHint(GLFW_CONTEXT_CREATION_API,)
             window = glfwCreateWindow(width, height, name, NULL, NULL);
+        } 
         else
             window = glfwCreateWindow(width, height, name, NULL, m_sharedContext);
 
@@ -35,6 +50,10 @@ namespace LANE
             
         glfwSetWindowUserPointer(window, this);
         glfwSetKeyCallback(window, key_callback);
+
+        glEnable(GL_DEBUG_OUTPUT);
+        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        glDebugMessageCallback(glDebugCallback, nullptr);
 
         return window;
     }

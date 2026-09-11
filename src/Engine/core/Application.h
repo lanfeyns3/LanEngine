@@ -7,6 +7,8 @@
 #include "AssetSystem.h"
 #include "SceneManager.h"
 
+#include "Threading.h"
+
 #include "utils/Random.h"
 #include "utils/Time.h"
 
@@ -21,11 +23,12 @@ namespace LANE
     {
     public:
         Application()
-            : renderer(assets,scenes,layers,windows), windows(eventSystem),eventSystem(layers)
+            : renderer(assets,scenes,layers,windows),assets(threads,windows), windows(eventSystem),eventSystem(layers)
         {
             NFD_Init();
             scenes.AddScene(0);
         }
+        
 
         Application& set_name(const char* name)
         {
@@ -82,6 +85,7 @@ namespace LANE
         EventSystem eventSystem;
         AssetSystem assets;
         SceneManager scenes;
+        Threading threads;
 
         Time frameTime;
         float prevFrameTime = 0;

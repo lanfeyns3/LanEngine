@@ -495,6 +495,7 @@ namespace LANE
     }
     void MeshAsset::Load(nlohmann::json f)
     {
+        loaded = false;
         tinyobj::attrib_t attrib;
 
         std::vector<tinyobj::shape_t> shapes;
@@ -547,5 +548,6 @@ namespace LANE
         vbo.Create(data,data.size());
         indiceCount = indices.size();
         ebo.Create(indices,indiceCount);
+        loaded = true;
     }
 }
