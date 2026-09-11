@@ -31,10 +31,7 @@ namespace LANE
         
         GLFWwindow* window = nullptr;
         if (strcmp(name, "ManorEngineRendererLoader") == 0)
-        {
-            //glfwWindowHint(GLFW_CONTEXT_CREATION_API,)
             window = glfwCreateWindow(width, height, name, NULL, NULL);
-        } 
         else
             window = glfwCreateWindow(width, height, name, NULL, m_sharedContext);
 

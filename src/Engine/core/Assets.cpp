@@ -549,5 +549,6 @@ namespace LANE
         indiceCount = indices.size();
         ebo.Create(indices,indiceCount);
         loaded = true;
+        glfwMakeContextCurrent(NULL);
     }
 }
