@@ -66,6 +66,8 @@ namespace LANE
 
     void Renderer::RenderScene(GLFWwindow* window)
     {
+        if (!scenes.CanRender())
+            return;
         glfwMakeContextCurrent(window);
 
         ImGui::SetCurrentContext(m_contexts[window]);

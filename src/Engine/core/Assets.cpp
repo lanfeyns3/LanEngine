@@ -516,6 +516,19 @@ namespace LANE
             meshSource.c_str()
         );
 
+        if (!warn.empty()) {
+            std::cerr << "tinyobj warning: " << warn << '\n';
+        }
+
+        if (!err.empty()) {
+            std::cerr << "tinyobj error: " << err << '\n';
+        }
+
+        if (!success) {
+            std::cerr << "Failed to load OBJ: " << meshSource << '\n';
+            return;
+        }
+
         std::vector<float> data;
         std::vector<GLuint> indices;
         

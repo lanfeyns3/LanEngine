@@ -80,6 +80,73 @@ public:
 
     void ImGuiUpdate()
     {
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Open Project"))
+                {
+                    nfdu8char_t *outPath;
+                    nfdu8filteritem_t filters[1] = { { "Lan Project", "lanprj" }};
+                    nfdopendialogu8args_t args = {0};
+                    args.filterList = filters;
+                    args.filterCount = 1;
+                    nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
+
+                    switch (result)
+                    {
+                    case NFD_OKAY:
+                    {
+                        std::string path = outPath;
+                        NFD_FreePathU8(outPath);
+
+                        LANE::File file(path);
+
+                        auto ret = file.Read(LANE::FileLoadType::Json);
+                        if (ret.has_value())
+                        {
+                            nlohmann::json json = std::get<nlohmann::json>(ret.value());
+
+                            application.scenes.LoadScenes(json);
+                        }
+                        else
+                        {
+
+                        }
+
+                        break;
+                    }
+                    
+                    default:
+                        break;
+                    }
+                }
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Scenes"))
+            {
+                if (ImGui::MenuItem("Save Scene"))
+                {
+                    LANE::File file("");
+
+                    std::vector<nfdu8filteritem_t> filters = {{"Lan Scene","lanscn"}};
+
+                    file.PromptFileDialog(LANE::DialogType::Save,filters);
+
+                    std::string data = application.scenes.SaveScene(application.scenes.GetCurrentScene());
+
+                    file.Write(data);
+                }
+                ImGui::EndMenu();
+            }
+
+            ImGui::EndMainMenuBar();
+        }
+
+        if (!application.scenes.CanRender())
+            return;
+
         ImGui::Begin("Inspector");
         auto entities = application.scenes.View<LANE::Components::Info>(application.scenes.GetCurrentScene());
 
@@ -121,6 +188,8 @@ public:
             }
         }
         ImGui::End();
+
+        
     }
 
     void OnEvent(LANE::EventType eType, LANE::Event* event)

@@ -30,28 +30,45 @@ namespace LANE
         template<typename T, typename... Args>
         void LoadAssetAsync(uint64_t id, const char* pathBuffer, Args&&... args)
         {
+            {
+                std::lock_guard<std::mutex> lock(assetsMutex);
+
+                if (m_assets.find(id) != m_assets.end())
+                {
+                    free((void*)pathBuffer);
+                    return;
+                }
+
+                m_assets[id] = nullptr;
+            }
+
+            std::string path(pathBuffer);
+            free((void*)pathBuffer);
+
             threads.AddThread(
-                [this, id, path = std::string(pathBuffer), args = std::make_tuple(std::forward<Args>(args)...)]() mutable
+                [this, id, path = std::move(path), args = std::make_tuple(std::forward<Args>(args)...)]() mutable
                 {
                     glfwMakeContextCurrent(windows.GetWindow("ManorEngineRendererLoader").first);
-                    std::ifstream f(path);
                 
+                    std::ifstream f(path);
                     nlohmann::json jsonFile;
                     f >> jsonFile;
                 
-                    m_assets[id] = std::apply(
-                        [](auto&&... args) {
-                            return std::make_shared<T>(
-                                std::forward<decltype(args)>(args)...
-                            );
+                    auto newAsset = std::apply(
+                        [](auto&&... innerArgs) {
+                            return std::make_shared<T>(std::forward<decltype(innerArgs)>(innerArgs)...);
                         },
                         std::move(args)
                     );
                 
-                    m_assets[id]->Load(jsonFile);
+                    newAsset->Load(jsonFile);
+
+                    {
+                        std::lock_guard<std::mutex> lock(assetsMutex);
+                        m_assets[id] = std::move(newAsset);
+                    }
                 }
             );
-            free((void*)pathBuffer);
         }
 
 
@@ -64,6 +81,8 @@ namespace LANE
     private:
         Threading& threads;
         WindowSystem& windows;
+
+        std::mutex assetsMutex;
         std::unordered_map<uint64_t,std::shared_ptr<Asset>> m_assets;
     };
 } // namespace LANE

@@ -11,6 +11,8 @@ namespace LANE
 {
     struct Asset
     {
+        bool loaded = false;
+        
         virtual void Load(nlohmann::json f) = 0;
     };
 
@@ -20,7 +22,6 @@ namespace LANE
 
         uint64_t uuid;
         uint32_t indiceCount;
-        bool loaded = false;
         
         VBO vbo;
         EBO ebo;
