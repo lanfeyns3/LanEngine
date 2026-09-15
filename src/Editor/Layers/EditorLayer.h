@@ -34,13 +34,6 @@ public:
         
         float speed = 1.0f;
 
-        if (selectedEntity != entt::null)
-        {
-            auto& selectedTransform = application.scenes.GetComponent<LANE::Components::Transform>(scene,selectedEntity);
-
-            selectedTransform.rotation.y += 25 * dt;
-        }
-
         for (auto meshEntity : application.scenes.View<LANE::Components::Mesh>(scene))
         {
             auto& mesh = application.scenes.GetComponent<LANE::Components::Mesh>(scene,meshEntity);

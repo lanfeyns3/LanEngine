@@ -141,8 +141,7 @@ namespace LANE
 
                             std::ifstream f(path);
                             nlohmann::json file = nlohmann::json::parse(f);
-
-                            uuid = file["UUID"];
+                            
                             pathUpdate = true;
                             break;
                         }

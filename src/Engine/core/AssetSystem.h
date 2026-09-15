@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <memory>
 #include <utility>
+#include <iostream>
 #include "Assets.h"
 
 #include <nlohmann/json.hpp>
@@ -33,10 +34,15 @@ namespace LANE
             {
                 std::lock_guard<std::mutex> lock(assetsMutex);
 
-                if (m_assets.find(id) != m_assets.end())
+                std::cout << id << "\n";
+
+                for (auto asset : m_assets)
                 {
-                    free((void*)pathBuffer);
-                    return;
+                    if (asset.first == id)
+                    {
+                        free((void*)pathBuffer);
+                        return;
+                    }
                 }
 
                 m_assets[id] = nullptr;
