@@ -9,7 +9,6 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <inttypes.h>
-#include <tiny_obj_loader.h>
 #include <nlohmann/json.hpp>
 #include <nfd.h>
 
@@ -141,7 +140,7 @@ namespace LANE
 
                             std::ifstream f(path);
                             nlohmann::json file = nlohmann::json::parse(f);
-                            
+
                             pathUpdate = true;
                             break;
                         }

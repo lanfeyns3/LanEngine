@@ -357,12 +357,9 @@ namespace LANE
 
     void Renderer::CreateShader(std::string path)
     {
-        std::ifstream f(path);
-        json file = json::parse(f);
-
         assets.LoadAsset<ShaderAsset>(
             69,
-            file,
+            path,
             windows.GetWindow("ManorEngineRendererLoader").first
         );
     }

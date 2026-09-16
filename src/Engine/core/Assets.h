@@ -4,8 +4,12 @@
 #include <GLFW/glfw3.h>
 #include <nlohmann/json.hpp>
 
+#include <functional>
+
 #include "renderer/VBO.h"
 #include "renderer/EBO.h"
+
+#include "WindowSystem.h"
 
 namespace LANE
 {
@@ -13,12 +17,12 @@ namespace LANE
     {
         bool loaded = false;
         
-        virtual void Load(nlohmann::json f) = 0;
+        virtual void Load(nlohmann::json f, std::function<void()> activateOpenglMutex) = 0;
     };
 
     struct MeshAsset : public Asset
     {
-        void Load(nlohmann::json f);
+        void Load(nlohmann::json f,std::function<void()> activateOpenglMutex);
 
         uint64_t uuid;
         uint32_t indiceCount;
@@ -32,7 +36,7 @@ namespace LANE
         ShaderAsset(GLFWwindow* Window)
             : window(Window)
         {}
-        void Load(nlohmann::json f);
+        void Load(nlohmann::json f,std::function<void()> activateOpenglMutex);
 
         unsigned int shaderProgram;
 

@@ -259,8 +259,6 @@ namespace LANE
                         }
                     }
                 }
-
-                //SleepThreadFor(.5s);
             }
 
             m_currentScene = m_scenes.begin()->first;

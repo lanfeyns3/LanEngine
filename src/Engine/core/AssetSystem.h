@@ -18,13 +18,40 @@ namespace LANE
     public:
         AssetSystem(Threading& Threads,WindowSystem& Windows)
             : threads(Threads), windows(Windows)
-        {}
+        {
+            openglActivateMutex = [this]() {
+                std::lock_guard<std::mutex> lock(assetsOpenglMutex);
+                glfwMakeContextCurrent(windows.GetWindow("ManorEngineRendererLoader").first);
+            };
+        }
 
         template<typename T,typename... _Args>
-        std::shared_ptr<T> LoadAsset(uint64_t id,nlohmann::json jsonFile, _Args&&... args)
+        std::shared_ptr<T> LoadAsset(uint64_t id,std::string jsonPath, _Args&&... args)
         {
-            m_assets[id] = std::make_shared<T>(std::forward<_Args>(args)...);
-            m_assets[id]->Load(jsonFile);
+            {
+                std::lock_guard<std::mutex> lock(assetsMutex);
+
+                for (auto asset : m_assets)
+                {
+                    if (asset.first == id)
+                        return nullptr;
+                }
+
+                m_assets[id] = nullptr;
+            }
+
+            auto newAsset = std::make_shared<T>(std::forward<_Args>(args)...);
+
+            std::ifstream f(jsonPath);
+            nlohmann::json file = nlohmann::json::parse(f);
+
+            newAsset->Load(file,openglActivateMutex);
+
+            {
+                std::lock_guard<std::mutex> lock(assetsMutex);
+                m_assets[id] = std::move(newAsset);
+            }
+
             return std::dynamic_pointer_cast<T>(m_assets[id]);
         }
 
@@ -33,8 +60,6 @@ namespace LANE
         {
             {
                 std::lock_guard<std::mutex> lock(assetsMutex);
-
-                std::cout << id << "\n";
 
                 for (auto asset : m_assets)
                 {
@@ -54,8 +79,6 @@ namespace LANE
             threads.AddThread(
                 [this, id, path = std::move(path), args = std::make_tuple(std::forward<Args>(args)...)]() mutable
                 {
-                    glfwMakeContextCurrent(windows.GetWindow("ManorEngineRendererLoader").first);
-                
                     std::ifstream f(path);
                     nlohmann::json jsonFile;
                     f >> jsonFile;
@@ -65,9 +88,9 @@ namespace LANE
                             return std::make_shared<T>(std::forward<decltype(innerArgs)>(innerArgs)...);
                         },
                         std::move(args)
-                    );
-                
-                    newAsset->Load(jsonFile);
+                    );  
+
+                    newAsset->Load(jsonFile,openglActivateMutex);
 
                     {
                         std::lock_guard<std::mutex> lock(assetsMutex);
@@ -88,7 +111,10 @@ namespace LANE
         Threading& threads;
         WindowSystem& windows;
 
+        std::function<void()> openglActivateMutex;
+
         std::mutex assetsMutex;
+        std::mutex assetsOpenglMutex;
         std::unordered_map<uint64_t,std::shared_ptr<Asset>> m_assets;
     };
 } // namespace LANE
