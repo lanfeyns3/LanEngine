@@ -139,7 +139,7 @@ namespace LANE
         return false;
     }
 
-    void ShaderAsset::Load(nlohmann::json f,std::function<void()> activateOpenglMutex)
+    void ShaderAsset::Load(nlohmann::json f,std::function<void()> activateOpenglMutex, std::function<void()> deActivateOpenglMutex)
     {
         std::cout
             << "\n========================================\n"
@@ -496,7 +496,7 @@ namespace LANE
         glfwMakeContextCurrent(nullptr);
     }
     
-    void MeshAsset::Load(nlohmann::json f,std::function<void()> activateOpenglMutex)
+    void MeshAsset::Load(nlohmann::json f,std::function<void()> activateOpenglMutex, std::function<void()> deActivateOpenglMutex)
     {
         loaded = false;
 
@@ -595,5 +595,6 @@ namespace LANE
 
         loaded = true;
         glfwMakeContextCurrent(NULL);
+        deActivateOpenglMutex();
     }
 }

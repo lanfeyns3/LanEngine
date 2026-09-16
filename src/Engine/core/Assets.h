@@ -17,12 +17,12 @@ namespace LANE
     {
         bool loaded = false;
         
-        virtual void Load(nlohmann::json f, std::function<void()> activateOpenglMutex) = 0;
+        virtual void Load(nlohmann::json f, std::function<void()> activateOpenglMutex, std::function<void()> deActivateOpenglMutex) = 0;
     };
 
     struct MeshAsset : public Asset
     {
-        void Load(nlohmann::json f,std::function<void()> activateOpenglMutex);
+        void Load(nlohmann::json f,std::function<void()> activateOpenglMutex, std::function<void()> deActivateOpenglMutex);
 
         uint64_t uuid;
         uint32_t indiceCount;
@@ -36,7 +36,7 @@ namespace LANE
         ShaderAsset(GLFWwindow* Window)
             : window(Window)
         {}
-        void Load(nlohmann::json f,std::function<void()> activateOpenglMutex);
+        void Load(nlohmann::json f,std::function<void()> activateOpenglMutex, std::function<void()> deActivateOpenglMutex);
 
         unsigned int shaderProgram;
 

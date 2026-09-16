@@ -19,9 +19,15 @@ namespace LANE
         AssetSystem(Threading& Threads,WindowSystem& Windows)
             : threads(Threads), windows(Windows)
         {
+
             openglActivateMutex = [this]() {
-                std::lock_guard<std::mutex> lock(assetsOpenglMutex);
+                openglBackingMutex.lock();
                 glfwMakeContextCurrent(windows.GetWindow("ManorEngineRendererLoader").first);
+            };
+
+            openglDeactivateMutex = [this]() {
+                glfwMakeContextCurrent(nullptr);
+                openglBackingMutex.unlock();
             };
         }
 
@@ -45,7 +51,7 @@ namespace LANE
             std::ifstream f(jsonPath);
             nlohmann::json file = nlohmann::json::parse(f);
 
-            newAsset->Load(file,openglActivateMutex);
+            newAsset->Load(file,openglActivateMutex,openglDeactivateMutex);
 
             {
                 std::lock_guard<std::mutex> lock(assetsMutex);
@@ -90,7 +96,7 @@ namespace LANE
                         std::move(args)
                     );  
 
-                    newAsset->Load(jsonFile,openglActivateMutex);
+                    newAsset->Load(jsonFile,openglActivateMutex,openglDeactivateMutex);
 
                     {
                         std::lock_guard<std::mutex> lock(assetsMutex);
@@ -112,6 +118,9 @@ namespace LANE
         WindowSystem& windows;
 
         std::function<void()> openglActivateMutex;
+        std::function<void()> openglDeactivateMutex;
+
+        std::mutex openglBackingMutex;
 
         std::mutex assetsMutex;
         std::mutex assetsOpenglMutex;
