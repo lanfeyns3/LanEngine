@@ -134,6 +134,25 @@ public:
                 ImGui::EndMenu();
             }
 
+            if (isRunning == false)
+            {
+                if (ImGui::Button("Play Scene"))
+                {
+                    isRunning = true;
+                    snapshot = application.scenes.SnapshotCurrentScene();
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Stop Scene"))
+                {
+                    isRunning = false;
+                    application.scenes.LoadCurrentSnapshot(snapshot);
+                    selected = false;
+                    selectedEntity = entt::null;
+                }
+            }
+
             ImGui::EndMainMenuBar();
         }
 
@@ -307,6 +326,9 @@ private:
     bool moveRight = false;
     bool moveUp = false;
     bool moveDown = false;
+
+    bool isRunning = false;
+    std::string snapshot = "";
     
     std::unordered_map<uint64_t,bool> selectables;
 };
