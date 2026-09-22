@@ -227,7 +227,7 @@ public:
                     application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
                     application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
 
-                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./monkey.mesh");
+                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./torus.mesh");
                     application.scenes.AddComponent<LANE::Components::Transform>(
                         application.scenes.GetCurrentScene(),
                         id,
