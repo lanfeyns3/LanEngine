@@ -9,7 +9,6 @@
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
 #include <inttypes.h>
-#include <tiny_obj_loader.h>
 #include <nlohmann/json.hpp>
 #include <nfd.h>
 
@@ -45,7 +44,12 @@ namespace LANE
 
         struct Renderer // TODO: better name
         {
-
+            nlohmann::json Serialize() const
+            {
+                nlohmann::json j;
+                j["Type"] = "Renderer";
+                return j;
+            }
         };
 
         struct Light
@@ -62,6 +66,14 @@ namespace LANE
                     ImGui::DragFloat("Intensity",&intensity);
                     ImGui::DragFloat3("Color",glm::value_ptr(color));
                 }
+            }
+
+            nlohmann::json Serialize() const
+            {
+                nlohmann::json j;
+                j["Type"] = "Light";
+                j["Radius"] = radius;
+                return j;
             }
         };
 
@@ -84,6 +96,29 @@ namespace LANE
                     ImGui::DragFloat3("Scale",glm::value_ptr(scale));
                 }
             }
+
+            nlohmann::json Serialize() const
+            {
+                nlohmann::json j;
+                j["Type"] = "Transform";
+                j["Position"] = nlohmann::json::object();
+                j["Rotation"] = nlohmann::json::object();
+                j["Size"] = nlohmann::json::object();
+            
+                j["Position"]["X"] = position.x;
+                j["Position"]["Y"] = position.y;
+                j["Position"]["Z"] = position.z;
+            
+                j["Rotation"]["X"] = rotation.x;
+                j["Rotation"]["Y"] = rotation.y;
+                j["Rotation"]["Z"] = rotation.z;
+            
+                j["Size"]["X"] = scale.x;
+                j["Size"]["Y"] = scale.y;
+                j["Size"]["Z"] = scale.z;
+            
+                return j;
+            }
         };
 
         struct Camera
@@ -94,6 +129,25 @@ namespace LANE
             float fov = 90.0f;
             float nearPlane = 0.1f;
             float farPlane  = 100.0f;
+
+            nlohmann::json Serialize() const
+            {
+                nlohmann::json j;
+                j["Type"] = "Camera";
+                j["Position"] = nlohmann::json::object();
+                j["Rotation"] = nlohmann::json::object();
+                j["Size"] = nlohmann::json::object();
+            
+                j["Position"]["X"] = position.x;
+                j["Position"]["Y"] = position.y;
+                j["Position"]["Z"] = position.z;
+            
+                j["Rotation"]["X"] = rotation.x;
+                j["Rotation"]["Y"] = rotation.y;
+                j["Rotation"]["Z"] = rotation.z;
+            
+                return j;
+            }
         };
 
         struct Mesh
@@ -110,6 +164,14 @@ namespace LANE
 
                 assets.LoadAssetAsync<MeshAsset>(file["UUID"],newText);
                 uuid = file["UUID"];
+            }
+
+            nlohmann::json Serialize() const
+            {
+                nlohmann::json j;
+                j["Type"] = "Mesh";
+                j["Source"] = path;
+                return j;
             }
 
             void RenderImGui()
@@ -142,7 +204,6 @@ namespace LANE
                             std::ifstream f(path);
                             nlohmann::json file = nlohmann::json::parse(f);
 
-                            uuid = file["UUID"];
                             pathUpdate = true;
                             break;
                         }

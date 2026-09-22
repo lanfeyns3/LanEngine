@@ -66,6 +66,8 @@ namespace LANE
 
     void Renderer::RenderScene(GLFWwindow* window)
     {
+        if (!scenes.CanRender())
+            return;
         glfwMakeContextCurrent(window);
 
         ImGui::SetCurrentContext(m_contexts[window]);
@@ -355,12 +357,9 @@ namespace LANE
 
     void Renderer::CreateShader(std::string path)
     {
-        std::ifstream f(path);
-        json file = json::parse(f);
-
         assets.LoadAsset<ShaderAsset>(
             69,
-            file,
+            path,
             windows.GetWindow("ManorEngineRendererLoader").first
         );
     }

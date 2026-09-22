@@ -20,9 +20,9 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
-    tinyobjloader
-    GIT_REPOSITORY https://github.com/tinyobjloader/tinyobjloader.git
-    GIT_TAG release
+    assimp
+    GIT_REPOSITORY https://github.com/assimp/assimp.git
+    GIT_TAG v6.0.5
 )
 
 FetchContent_Declare(
@@ -66,7 +66,7 @@ FetchContent_MakeAvailable(
     nlohmann_json
     EnTT
     glm
-    tinyobjloader
+    assimp
     imgui
     nfd
 )
@@ -103,7 +103,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     EnTT::EnTT
     glm
     imgui
-    tinyobjloader
+    assimp
     nfd
 )
 

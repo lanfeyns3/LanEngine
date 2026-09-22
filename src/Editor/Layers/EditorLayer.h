@@ -34,13 +34,6 @@ public:
         
         float speed = 1.0f;
 
-        if (selectedEntity != entt::null)
-        {
-            auto& selectedTransform = application.scenes.GetComponent<LANE::Components::Transform>(scene,selectedEntity);
-
-            selectedTransform.rotation.y += 25 * dt;
-        }
-
         for (auto meshEntity : application.scenes.View<LANE::Components::Mesh>(scene))
         {
             auto& mesh = application.scenes.GetComponent<LANE::Components::Mesh>(scene,meshEntity);
@@ -80,6 +73,100 @@ public:
 
     void ImGuiUpdate()
     {
+        if (ImGui::BeginMainMenuBar())
+        {
+            if (ImGui::BeginMenu("File"))
+            {
+                if (ImGui::MenuItem("Save Project"))
+                {
+                    LANE::File file{""};
+
+                    std::vector<nfdu8filteritem_t> filters = { { "Lan Project", "lanprj" }};
+                    file.PromptFileDialog(LANE::DialogType::Save,filters);
+
+                    std::string output = application.scenes.SaveScenes();
+                    file.Write(output);
+                }
+                if (ImGui::MenuItem("Open Project"))
+                {
+                    nfdu8char_t *outPath;
+                    nfdu8filteritem_t filters[1] = { { "Lan Project", "lanprj" }};
+                    nfdopendialogu8args_t args = {0};
+                    args.filterList = filters;
+                    args.filterCount = 1;
+                    nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
+
+                    switch (result)
+                    {
+                    case NFD_OKAY:
+                    {
+                        std::string path = outPath;
+                        NFD_FreePathU8(outPath);
+
+                        LANE::File file(path);
+
+                        auto ret = file.Read(LANE::FileLoadType::Json);
+                        if (ret.has_value())
+                        {
+                            nlohmann::json json = std::get<nlohmann::json>(ret.value());
+
+                            application.scenes.LoadScenes(json);
+                        }
+                        else
+                        {
+
+                        }
+
+                        break;
+                    }
+                    
+                    default:
+                        break;
+                    }
+                }
+                ImGui::EndMenu();
+            }
+
+            if (ImGui::BeginMenu("Scenes"))
+            {
+                if (ImGui::MenuItem("Save Scene"))
+                {
+                    LANE::File file("");
+                    std::vector<nfdu8filteritem_t> filters = {{"Lan Scene","lanscn"}};
+                    file.PromptFileDialog(LANE::DialogType::Save,filters);
+
+                    std::string data = application.scenes.SaveScene(application.scenes.GetCurrentScene());
+
+                    file.Write(data);
+                }
+                ImGui::EndMenu();
+            }
+
+            if (isRunning == false)
+            {
+                if (ImGui::Button("Play Scene"))
+                {
+                    isRunning = true;
+                    snapshot = application.scenes.SnapshotCurrentScene();
+                }
+            }
+            else
+            {
+                if (ImGui::Button("Stop Scene"))
+                {
+                    isRunning = false;
+                    application.scenes.LoadCurrentSnapshot(snapshot);
+                    selected = false;
+                    selectedEntity = entt::null;
+                }
+            }
+
+            ImGui::EndMainMenuBar();
+        }
+
+        if (!application.scenes.CanRender())
+            return;
+
         ImGui::Begin("Inspector");
         auto entities = application.scenes.View<LANE::Components::Info>(application.scenes.GetCurrentScene());
 
@@ -121,6 +208,8 @@ public:
             }
         }
         ImGui::End();
+
+        
     }
 
     void OnEvent(LANE::EventType eType, LANE::Event* event)
@@ -138,7 +227,7 @@ public:
                     application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
                     application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
 
-                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./monkey.mesh");
+                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./torus.mesh");
                     application.scenes.AddComponent<LANE::Components::Transform>(
                         application.scenes.GetCurrentScene(),
                         id,
@@ -245,6 +334,9 @@ private:
     bool moveRight = false;
     bool moveUp = false;
     bool moveDown = false;
+
+    bool isRunning = false;
+    std::string snapshot = "";
     
     std::unordered_map<uint64_t,bool> selectables;
 };

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <thread>
 #include <chrono>
+
+using namespace std::chrono_literals;
 
 namespace LANE
 {
@@ -22,4 +25,10 @@ namespace LANE
     private:
         std::chrono::steady_clock::time_point past;
     };
+
+    template<class Rep, class Period>
+    void SleepThreadFor(std::chrono::duration<Rep, Period> duration)
+    {
+        std::this_thread::sleep_for(duration);
+    }
 } // namespace LANE

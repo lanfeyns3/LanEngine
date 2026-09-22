@@ -5,7 +5,9 @@
 #include <string>
 #include <iostream>
 
-#include <tiny_obj_loader.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 namespace LANE
 {
@@ -137,7 +139,7 @@ namespace LANE
         return false;
     }
 
-    void ShaderAsset::Load(nlohmann::json f)
+    void ShaderAsset::Load(nlohmann::json f,std::function<void()> activateOpenglMutex, std::function<void()> deActivateOpenglMutex)
     {
         std::cout
             << "\n========================================\n"
@@ -493,62 +495,106 @@ namespace LANE
 
         glfwMakeContextCurrent(nullptr);
     }
-    void MeshAsset::Load(nlohmann::json f)
+    
+    void MeshAsset::Load(nlohmann::json f,std::function<void()> activateOpenglMutex, std::function<void()> deActivateOpenglMutex)
     {
         loaded = false;
-        tinyobj::attrib_t attrib;
-
-        std::vector<tinyobj::shape_t> shapes;
-        std::vector<tinyobj::material_t> materials;
-
-        std::string warn;
-        std::string err;
 
         std::string meshSource = f["MeshSource"];
         uuid = f["UUID"];
 
-        bool success = tinyobj::LoadObj(
-            &attrib,
-            &shapes,
-            &materials,
-            &warn,
-            &err,
-            meshSource.c_str()
+        Assimp::Importer importer;
+        
+        // Read the file and apply post-processing steps:
+        // - aiProcess_Triangulate: Ensures all shapes are broken down into triangles.
+        // - aiProcess_GenSmoothNormals: Generates normals if the model lacks them.
+        // - aiProcess_JoinIdenticalVertices: Optimizes vertex count via indexing.
+        const aiScene* scene = importer.ReadFile(
+            meshSource,
+            aiProcess_Triangulate | 
+            aiProcess_GenSmoothNormals | 
+            aiProcess_JoinIdenticalVertices
         );
+
+        if (!scene) {
+            std::cerr << "DEBUG: scene is nullptr!\n";
+        } else if (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) {
+            std::cerr << "DEBUG: scene is incomplete!\n";
+        } else if (!scene->mRootNode) {
+            std::cerr << "DEBUG: scene root node is null!\n";
+        }
+
+        if (!scene || (scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE) || !scene->mRootNode)
+        {
+            std::cerr << "Failed to load mesh with Assimp: " << meshSource 
+                      << " | Error: " << importer.GetErrorString() << '\n';
+            return;
+        }
+
+        // For simplicity, this example extracts the first mesh found in the file 
+        // (similar to how single-mesh OBJ files were handled previously).
+        if (scene->mNumMeshes == 0)
+        {
+            std::cerr << "No meshes found in file: " << meshSource << '\n';
+            return;
+        }
+
+        aiMesh* mesh = scene->mMeshes[0];
 
         std::vector<float> data;
         std::vector<GLuint> indices;
-        
-        for (const auto& index : shapes[0].mesh.indices)
+
+        // Reserve memory to avoid unnecessary reallocations
+        data.reserve(mesh->mNumVertices * 6); // 3 for position, 3 for normal
+        indices.reserve(mesh->mNumFaces * 3);
+
+        // Extract vertex data (Positions and Normals)
+        for (unsigned int i = 0; i < mesh->mNumVertices; i++)
         {
-            const size_t vi = 3 * index.vertex_index;
-        
-            data.emplace_back(attrib.vertices.at(vi + 0));
-            data.emplace_back(attrib.vertices.at(vi + 1));
-            data.emplace_back(attrib.vertices.at(vi + 2));
-        
-            if (index.normal_index >= 0)
+            // Positions
+            data.push_back(mesh->mVertices[i].x);
+            data.push_back(mesh->mVertices[i].y);
+            data.push_back(mesh->mVertices[i].z);
+
+            // Normals (Assimp guarantees normals exist if aiProcess_GenSmoothNormals is used)
+            if (mesh->HasNormals())
             {
-                const size_t ni = 3 * index.normal_index;
-            
-                data.emplace_back(attrib.normals.at(ni + 0));
-                data.emplace_back(attrib.normals.at(ni + 1));
-                data.emplace_back(attrib.normals.at(ni + 2));
+                data.push_back(mesh->mNormals[i].x);
+                data.push_back(mesh->mNormals[i].y);
+                data.push_back(mesh->mNormals[i].z);
             }
             else
             {
-                // No normal in the OBJ.
-                data.emplace_back(0.0f);
-                data.emplace_back(0.0f);
-                data.emplace_back(0.0f);
+                data.push_back(0.0f);
+                data.push_back(0.0f);
+                data.push_back(0.0f);
             }
-        
-            indices.push_back(static_cast<GLuint>(indices.size()));
         }
-        vbo.Create(data,data.size());
-        indiceCount = indices.size();
-        ebo.Create(indices,indiceCount);
+
+        // Extract index data
+        for (unsigned int i = 0; i < mesh->mNumFaces; i++)
+        {
+            const aiFace& face = mesh->mFaces[i];
+            
+            // Because we used aiProcess_Triangulate, every face should be a triangle (3 indices)
+            if (face.mNumIndices != 3)
+            {
+                std::cerr << "Warning: Non-triangular face encountered, skipping.\n";
+                continue;
+            }
+
+            indices.push_back(face.mIndices[0]);
+            indices.push_back(face.mIndices[1]);
+            indices.push_back(face.mIndices[2]);
+        }
+
+        activateOpenglMutex();
+        vbo.Create(data, data.size());
+        indiceCount = static_cast<GLsizei>(indices.size());
+        ebo.Create(indices, indiceCount);
+
         loaded = true;
         glfwMakeContextCurrent(NULL);
+        deActivateOpenglMutex();
     }
 }
