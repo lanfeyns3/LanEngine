@@ -77,6 +77,16 @@ public:
         {
             if (ImGui::BeginMenu("File"))
             {
+                if (ImGui::MenuItem("Save Project"))
+                {
+                    LANE::File file{""};
+
+                    std::vector<nfdu8filteritem_t> filters = { { "Lan Project", "lanprj" }};
+                    file.PromptFileDialog(LANE::DialogType::Save,filters);
+
+                    std::string output = application.scenes.SaveScenes();
+                    file.Write(output);
+                }
                 if (ImGui::MenuItem("Open Project"))
                 {
                     nfdu8char_t *outPath;
@@ -122,9 +132,7 @@ public:
                 if (ImGui::MenuItem("Save Scene"))
                 {
                     LANE::File file("");
-
                     std::vector<nfdu8filteritem_t> filters = {{"Lan Scene","lanscn"}};
-
                     file.PromptFileDialog(LANE::DialogType::Save,filters);
 
                     std::string data = application.scenes.SaveScene(application.scenes.GetCurrentScene());

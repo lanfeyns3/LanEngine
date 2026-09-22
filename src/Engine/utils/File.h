@@ -39,7 +39,7 @@ namespace LANE
 
         std::expected<ReadResult,FileLoadError> Read(FileLoadType type);
         void Write(std::string data);
-        void PromptFileDialog(DialogType type,std::vector<nfdu8filteritem_t> filters);
+        std::string PromptFileDialog(DialogType type,std::vector<nfdu8filteritem_t> filters);
     private:
         std::string m_path;
     };

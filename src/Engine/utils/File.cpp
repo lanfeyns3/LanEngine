@@ -31,7 +31,7 @@ namespace LANE
         f.close();
     }
 
-    void File::PromptFileDialog(DialogType type,std::vector<nfdu8filteritem_t> filters)
+    std::string File::PromptFileDialog(DialogType type,std::vector<nfdu8filteritem_t> filters)
     {
         switch (type)
         {
@@ -63,6 +63,8 @@ namespace LANE
         default:
             break;
         }
+
+        return m_path;
     }
 
 } // namespace LANE

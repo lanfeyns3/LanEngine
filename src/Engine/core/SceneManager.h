@@ -125,6 +125,9 @@ namespace LANE
             return json.dump(4);
         }
 
+        std::string GetPath() {return path;}
+        void SetPath(std::string Path) {path = std::move(Path);}
+        
         void Clear()
         {
             registry.clear();
@@ -133,6 +136,8 @@ namespace LANE
     private:
         entt::entity m_mainCamera;
         entt::registry registry;
+
+        std::string path = "";
     };
 
     class SceneManager
@@ -188,7 +193,7 @@ namespace LANE
             nlohmann::json j = nlohmann::json::parse(snapshot);
             m_scenes[m_currentScene].Clear();
             LoadScene(j,m_scenes[m_currentScene]);
-            
+
             for (auto entity : m_scenes[m_currentScene].View<Components::Info>())
             {
                 auto& info = GetComponent<Components::Info>(m_currentScene, entity);
@@ -273,12 +278,40 @@ namespace LANE
             m_canRender = true;
         }
 
+        std::string SaveScenes()
+        {
+            nlohmann::json j;
+
+            j["Scenes"] = nlohmann::json::array();
+            
+            for (auto& scene : m_scenes)
+            {
+                if (scene.second.GetPath() == "")
+                {
+                    File file("");
+
+                    std::vector<nfdu8filteritem_t> filters = {{"Lan Scene","lanscn"}};
+
+                    std::string path = file.PromptFileDialog(LANE::DialogType::Save,filters);
+                    file.Write(SaveScene(scene.first));
+                    scene.second.SetPath(path);
+                }
+
+                nlohmann::json sceneBlock;
+                sceneBlock["Path"] = scene.second.GetPath();
+
+                j["Scenes"].push_back(std::move(sceneBlock));
+            }
+
+            return j.dump(4);
+        }
+
         bool CanRender()
         {
             return m_canRender;
         }
     private:
-        uint64_t m_currentScene;
+        uint64_t m_currentScene = 0;
         std::unordered_map<uint64_t, Scene> m_scenes;
 
         bool m_canRender = true;
