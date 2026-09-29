@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <box3d/box3d.h>
 
 #include <imgui.h>
 #include <misc/cpp/imgui_stdlib.h>
@@ -219,6 +220,53 @@ namespace LANE
             std::string path;
 
             bool pathUpdate = false;
+        };
+
+        struct Physics
+        {
+            b3BodyId id;
+            bool isStatic = false;
+
+            Physics(b3WorldId& worldID)
+            {
+                b3BodyDef bodyDef = b3DefaultBodyDef();
+                bodyDef.type = b3_dynamicBody;
+                bodyDef.position = { 0.0f, 5.0f, 0.0f };
+                    
+                id = b3CreateBody(worldID, &bodyDef);
+                    
+                b3ShapeDef shapeDef = b3DefaultShapeDef();
+                shapeDef.density = 1.0f;
+
+                b3BoxHull box = b3MakeBoxHull(0.5f, 0.5f, 0.5f); 
+                    
+                b3CreateHullShape(id, &shapeDef, &box.base);
+            }
+
+            void RenderImGui()
+            {
+                if (ImGui::CollapsingHeader("Physics", ImGuiTreeNodeFlags_DefaultOpen))
+                {
+                    if (ImGui::Checkbox("Is Static",&isStatic))
+                    {
+                        b3WorldId worldID = b3Body_GetWorld(id);
+                        b3DestroyBody(id);
+                        b3BodyDef bodyDef = b3DefaultBodyDef();
+
+                        if (isStatic)
+                            bodyDef.type = b3_staticBody;
+                        else
+                            bodyDef.type = b3_dynamicBody;
+
+                        bodyDef.position = { 0.0f, 5.0f, 0.0f };
+                        id = b3CreateBody(worldID, &bodyDef);
+                        b3ShapeDef shapeDef = b3DefaultShapeDef();
+                        shapeDef.density = 1.0f;
+                        b3BoxHull box = b3MakeBoxHull(0.5f, 0.5f, 0.5f); 
+                        b3CreateHullShape(id, &shapeDef, &box.base);
+                    };
+                }
+            }
         };
     } // namespace Components
     

@@ -26,6 +26,15 @@ namespace LANE
             }
         }
 
+        void UpdatePhysics(float dt)
+        {
+            std::lock_guard<std::mutex> lock(layerMutex);
+             for (auto layer : m_layers)
+            {
+                layer.second->PhysicsUpdate();
+            }
+        }
+
         void UpdateImgui()
         {
             std::lock_guard<std::mutex> lock(layerMutex);

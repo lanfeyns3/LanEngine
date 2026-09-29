@@ -6,6 +6,7 @@
 #include "renderer/Renderer.h"
 #include "AssetSystem.h"
 #include "SceneManager.h"
+#include "physics/PhysicsManager.h"
 
 #include "Threading.h"
 
@@ -87,6 +88,7 @@ namespace LANE
         AssetSystem assets;
         SceneManager scenes;
         Threading threads;
+        PhysicsManager physics;
 
         Time frameTime;
         float prevFrameTime = 0;

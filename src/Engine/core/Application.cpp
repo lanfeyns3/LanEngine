@@ -8,6 +8,21 @@ namespace LANE
     {
         frameTime.Start();
         prevFrameTime = frameTime.Get();
+
+        threads.AddThread([this]() {
+            constexpr float fixedDt = 1.0f / 60.0f;
+
+            while (running)
+            {
+                if (physics.IsPhysicsEnabled())
+                    physics.UpdatePhysics(fixedDt, this->layers);
+            
+                std::this_thread::sleep_for(
+                    std::chrono::milliseconds(16)
+                );
+            }
+        });
+
         while (running)
         {
             glfwPollEvents();

@@ -148,6 +148,7 @@ public:
                 {
                     isRunning = true;
                     snapshot = application.scenes.SnapshotCurrentScene();
+                    application.physics.EnablePhysics();
                 }
             }
             else
@@ -158,6 +159,7 @@ public:
                     application.scenes.LoadCurrentSnapshot(snapshot);
                     selected = false;
                     selectedEntity = entt::null;
+                    application.physics.DisablePhysics();
                 }
             }
 
@@ -206,10 +208,31 @@ public:
             {
                 application.scenes.GetComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),selectedEntity).RenderImGui();
             }
+            if (application.scenes.HasComponent<LANE::Components::Physics>(application.scenes.GetCurrentScene(),selectedEntity))
+            {
+                application.scenes.GetComponent<LANE::Components::Physics>(application.scenes.GetCurrentScene(),selectedEntity).RenderImGui();
+            }
         }
         ImGui::End();
 
         
+    }
+
+    void PhysicsUpdate()
+    {
+        auto view = application.scenes.View<LANE::Components::Transform,LANE::Components::Physics>(application.scenes.GetCurrentScene());
+
+        for (auto entity : view)
+        {
+            auto& transform = application.scenes.GetComponent<LANE::Components::Transform>(application.scenes.GetCurrentScene(),entity);
+            auto& physics = application.scenes.GetComponent<LANE::Components::Physics>(application.scenes.GetCurrentScene(),entity);
+
+            auto pPosition = b3Body_GetPosition(physics.id);
+            std::cout << "X: " << pPosition.x << ", Y: " << pPosition.y << ", X: " << pPosition.z << "\n";
+            transform.position = glm::vec3(pPosition.x,pPosition.y,pPosition.z);
+        }
+
+
     }
 
     void OnEvent(LANE::EventType eType, LANE::Event* event)
@@ -234,6 +257,27 @@ public:
                         glm::vec3(0.0f),
                         glm::vec3(0.0f),
                         glm::vec3(1.0f)
+                    );
+                }
+                if (keyEvent->key == GLFW_KEY_P) // add new entity
+                {
+                    std::cout << "Add new Physics\n";
+                    uint64_t id = LANE::RandomUInt64();
+                    application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
+                    application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
+
+                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./torus.mesh");
+                    application.scenes.AddComponent<LANE::Components::Transform>(
+                        application.scenes.GetCurrentScene(),
+                        id,
+                        glm::vec3(0.0f),
+                        glm::vec3(0.0f),
+                        glm::vec3(1.0f)
+                    );
+                    application.scenes.AddComponent<LANE::Components::Physics>(
+                        application.scenes.GetCurrentScene(),
+                        id,
+                        application.physics.GetWorldID()
                     );
                 }
                 else if (keyEvent->key == GLFW_KEY_LEFT_ALT)

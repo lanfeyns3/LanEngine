@@ -55,7 +55,11 @@ FetchContent_Declare(
     GIT_TAG master
 )
 
-
+FetchContent_Declare(
+    box3d
+    GIT_REPOSITORY https://github.com/erincatto/box3d.git
+    GIT_TAG v0.1.0
+)
 
 set(GLM_BUILD_TESTS OFF)
 set(IMGUI_ENABLE_OPENGL3 ON CACHE BOOL "Enable OpenGL3" FORCE)
@@ -69,6 +73,7 @@ FetchContent_MakeAvailable(
     assimp
     imgui
     nfd
+    box3d
 )
 
 find_package(OpenGL REQUIRED)
@@ -105,6 +110,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     imgui
     assimp
     nfd
+    box3d::box3d
 )
 
 add_executable(Editor
