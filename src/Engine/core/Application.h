@@ -25,7 +25,7 @@ namespace LANE
     {
     public:
         Application()
-            : renderer(assets,scenes,layers,windows),scenes(assets),assets(threads,windows), windows(eventSystem),eventSystem(layers)
+            : renderer(assets,scenes,layers,windows),scenes(assets,physics),assets(threads,windows), windows(eventSystem),eventSystem(layers)
         {
             NFD_Init();
             scenes.AddScene(0);

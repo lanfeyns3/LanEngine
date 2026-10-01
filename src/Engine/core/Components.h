@@ -227,10 +227,13 @@ namespace LANE
             b3BodyId id;
             bool isStatic = false;
 
-            Physics(b3WorldId& worldID)
+            Physics(b3WorldId& worldID,bool dynamic = true)
             {
                 b3BodyDef bodyDef = b3DefaultBodyDef();
-                bodyDef.type = b3_dynamicBody;
+                if (dynamic)
+                    bodyDef.type = b3_dynamicBody;
+                else
+                    bodyDef.type = b3_staticBody;
                 bodyDef.position = { 0.0f, 5.0f, 0.0f };
                     
                 id = b3CreateBody(worldID, &bodyDef);
@@ -241,6 +244,14 @@ namespace LANE
                 b3BoxHull box = b3MakeBoxHull(0.5f, 0.5f, 0.5f); 
                     
                 b3CreateHullShape(id, &shapeDef, &box.base);
+            }
+
+            nlohmann::json Serialize() const
+            {
+                nlohmann::json j;
+                j["Type"] = "Physics";
+                j["PhysicsType"] = isStatic ? "Static" : "Dynamic"; 
+                return j;
             }
 
             void RenderImGui()

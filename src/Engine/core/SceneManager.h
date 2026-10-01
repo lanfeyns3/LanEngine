@@ -8,6 +8,7 @@
 
 #include "Components.h"
 #include "AssetSystem.h"
+#include "physics/PhysicsManager.h"
 #include "utils/File.h"
 #include "utils/Time.h"
 
@@ -115,6 +116,12 @@ namespace LANE
                     json["Entities"].back()["Components"].push_back(std::move(rendererJson));
                 }
 
+                if (HasComponent<Components::Physics>(entity))
+                {
+                    auto& physics = Get<Components::Physics>(entity);
+                    json["Entities"].back()["Components"].push_back(physics.Serialize());
+                }
+
                 if (HasComponent<Components::Transform>(entity))
                 {
                     auto& transform = Get<Components::Transform>(entity);
@@ -143,8 +150,8 @@ namespace LANE
     class SceneManager
     {
     public:
-        SceneManager(AssetSystem& assets)
-            : m_assets(assets)
+        SceneManager(AssetSystem& assets, PhysicsManager& physics)
+            : m_assets(assets), m_physics(physics)
         {}
         void AddScene(uint64_t id);
         void AddEntity(uint64_t sceneID, uint64_t id, std::string name = "New Object");
@@ -234,6 +241,10 @@ namespace LANE
                     {
                         scene.AddComponent<Components::Renderer>(entityData["UUID"]);
                     }
+                    else if (componentData["Type"] == "Physics")
+                    {
+                        scene.AddComponent<Components::Physics>(entityData["UUID"],m_physics.GetWorldID(),entityData["PhysicsType"] != "Static");
+                    }
                     else if (componentData["Type"] == "Camera")
                     {
                         scene.AddComponent<Components::Camera>(entityData["UUID"]);
@@ -316,5 +327,6 @@ namespace LANE
 
         bool m_canRender = true;
         AssetSystem& m_assets;
+        PhysicsManager& m_physics;
     };
 } // namespace LANE
