@@ -2,6 +2,7 @@
 
 #include <box3d/box3d.h>
 #include "core/LayerSystem.h"
+#include "core/SceneManager.h"
 
 #include <iostream>
 
@@ -23,6 +24,25 @@ namespace LANE
         void UpdatePhysics(float deltaTime,LayerSystem& layers) {
             b3World_Step(worldID, deltaTime, 4);
             layers.UpdatePhysics(deltaTime);
+        }
+
+        template<typename ViewFn, typename TransformFn, typename PhysicsFn>
+        void ResetBodies(
+            ViewFn getView,
+            TransformFn getTransform,
+            PhysicsFn getPhysics
+        )
+        {
+            for (auto entity : getView())
+            {
+                auto& transform = getTransform(entity);
+                auto& physics = getPhysics(entity);
+
+                auto bTransform = b3Body_GetTransform(physics.id);
+                bTransform.p = b3Vec3(transform.position.x,transform.position.y,transform.position.z);
+
+                b3Body_SetTransform(physics.id,bTransform.p,bTransform.q);
+            }
         }
 
         bool IsPhysicsEnabled() {return runPhysics;}

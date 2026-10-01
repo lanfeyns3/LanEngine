@@ -16,6 +16,17 @@ namespace LANE
             {
                 if (physics.IsPhysicsEnabled())
                     physics.UpdatePhysics(fixedDt, this->layers);
+                else
+                    physics.ResetBodies([this]() {
+                            return scenes.View<Components::Transform,Components::Physics>(scenes.GetCurrentScene());
+                        },
+                        [this](entt::entity entity) -> Components::Transform& {
+                            return scenes.GetComponent<Components::Transform>(scenes.GetCurrentScene(),entity);
+                        },
+                        [this](entt::entity entity) -> Components::Physics& {
+                            return scenes.GetComponent<Components::Physics>(scenes.GetCurrentScene(),entity);
+                        }
+                    );
             
                 std::this_thread::sleep_for(
                     std::chrono::milliseconds(16)
