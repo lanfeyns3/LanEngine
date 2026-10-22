@@ -6,14 +6,6 @@
 #include "core/Application.h"
 #include <fstream>
 
-void tempThread()
-{
-    for (int i = 0; i < 100000; i++)
-    {
-        std::cout << i << "\n";
-    }
-}
-
 class EditorLayer : public LANE::Layer
 {
 public:
@@ -24,6 +16,8 @@ public:
         editorCameraID = LANE::RandomUInt64();
         application.scenes.AddEntity(application.scenes.GetCurrentScene(),editorCameraID,"Editor Camera");
         application.scenes.AddComponent<LANE::Components::Camera>(application.scenes.GetCurrentScene(),editorCameraID);
+
+
     }
     
     void Update(float dt)
@@ -243,92 +237,31 @@ public:
 
             if (keyEvent->type == LANE::KeyEventType::KeyStroke)
             {
-                if (keyEvent->key == GLFW_KEY_ENTER) // add new entity
+                switch (keyEvent->key)
                 {
-                    std::cout << "Add new Entity\n";
-                    uint64_t id = LANE::RandomUInt64();
-                    application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
-                    application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
-
-                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./torus.mesh");
-                    application.scenes.AddComponent<LANE::Components::Transform>(
-                        application.scenes.GetCurrentScene(),
-                        id,
-                        glm::vec3(0.0f),
-                        glm::vec3(0.0f),
-                        glm::vec3(1.0f)
-                    );
-                }
-                if (keyEvent->key == GLFW_KEY_P) // add new entity
-                {
-                    std::cout << "Add new Physics\n";
-                    uint64_t id = LANE::RandomUInt64();
-                    application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
-                    application.scenes.AddComponent<LANE::Components::Renderer>(application.scenes.GetCurrentScene(),id);
-
-                    application.scenes.AddComponent<LANE::Components::Mesh>(application.scenes.GetCurrentScene(),id,application.assets,"./torus.mesh");
-                    application.scenes.AddComponent<LANE::Components::Transform>(
-                        application.scenes.GetCurrentScene(),
-                        id,
-                        glm::vec3(0.0f),
-                        glm::vec3(0.0f),
-                        glm::vec3(1.0f)
-                    );
-                    application.scenes.AddComponent<LANE::Components::Physics>(
-                        application.scenes.GetCurrentScene(),
-                        id,
-                        application.physics.GetWorldID()
-                    );
-                }
-                else if (keyEvent->key == GLFW_KEY_LEFT_ALT)
-                {
-                    std::cout << "Add new Light\n";
-                    uint64_t id = LANE::RandomUInt64();
-                    application.scenes.AddEntity(application.scenes.GetCurrentScene(),id);
-                    application.scenes.AddComponent<LANE::Components::Light>(
-                        application.scenes.GetCurrentScene(),
-                        id
-                    );
-                    application.scenes.AddComponent<LANE::Components::Transform>(
-                        application.scenes.GetCurrentScene(),
-                        id,
-                        glm::vec3(0.0f),
-                        glm::vec3(0.0f),
-                        glm::vec3(1.0f)
-                    );
-                }
-                else if (keyEvent->key == GLFW_KEY_C)
-                {
-                    application.threads.AddThread([]() {tempThread();});
-                }
-                else
-                {
-                    switch (keyEvent->key)
-                    {
-                        case GLFW_KEY_W:
-                            moveForward = true;
-                            break;
-                    
-                        case GLFW_KEY_S:
-                            moveBackward = true;
-                            break;
-                    
-                        case GLFW_KEY_A:
-                            moveLeft = true;
-                            break;
-                    
-                        case GLFW_KEY_D:
-                            moveRight = true;
-                            break;
-                    
-                        case GLFW_KEY_Q:
-                            moveUp = true;
-                            break;
-                    
-                        case GLFW_KEY_E:
-                            moveDown = true;
-                            break;
-                    }
+                    case GLFW_KEY_W:
+                        moveForward = true;
+                        break;
+                
+                    case GLFW_KEY_S:
+                        moveBackward = true;
+                        break;
+                
+                    case GLFW_KEY_A:
+                        moveLeft = true;
+                        break;
+                
+                    case GLFW_KEY_D:
+                        moveRight = true;
+                        break;
+                
+                    case GLFW_KEY_Q:
+                        moveUp = true;
+                        break;
+                
+                    case GLFW_KEY_E:
+                        moveDown = true;
+                        break;
                 }
             }
 

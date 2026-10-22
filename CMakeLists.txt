@@ -61,6 +61,12 @@ FetchContent_Declare(
     GIT_TAG v0.1.0
 )
 
+FetchContent_Declare(
+    lua
+    GIT_REPOSITORY https://github.com/lanfeyns3/lua.git
+    GIT_TAG v5.5.1-cmake
+)
+
 set(GLM_BUILD_TESTS OFF)
 set(IMGUI_ENABLE_OPENGL3 ON CACHE BOOL "Enable OpenGL3" FORCE)
 
@@ -74,6 +80,7 @@ FetchContent_MakeAvailable(
     imgui
     nfd
     box3d
+    lua
 )
 
 find_package(OpenGL REQUIRED)
@@ -111,6 +118,7 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
     assimp
     nfd
     box3d::box3d
+    lua
 )
 
 add_executable(Editor

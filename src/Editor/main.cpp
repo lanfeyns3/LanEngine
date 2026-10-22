@@ -16,7 +16,7 @@ int main()
     
 
     app
-        .set_name("My Game")
+        .set_name("LanEditor")
         .add_window(1280, 720)
         .append_layers(layers)
         .subscribe_layers(subscribers)
